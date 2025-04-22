@@ -1,0 +1,8 @@
+
+version: '3.8'
+name: booking
+services:
+  postgresql:
+    extends:
+      file: mysql.yaml
+      service: mysql

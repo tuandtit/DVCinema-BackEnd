@@ -1,0 +1,24 @@
+# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
+name: booking
+services:
+  mysql:
+    image: mysql:8.0.36-debian
+    container_name: mysql-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=booking
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ptuan6326"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: on-failure
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
