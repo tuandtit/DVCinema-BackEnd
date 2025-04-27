@@ -9,6 +9,7 @@ import com.cinema.booking_app.movie.dto.response.MovieResponseDto;
 import com.cinema.booking_app.movie.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,8 +19,8 @@ public class MovieController {
 
     private final MovieService movieService;
 
-    @PostMapping
-    public Response<MovieResponseDto> create(@Valid @RequestBody MovieRequestDto dto) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<MovieResponseDto> create(@Valid MovieRequestDto dto) {
         return Response.created(movieService.create(dto));
     }
 

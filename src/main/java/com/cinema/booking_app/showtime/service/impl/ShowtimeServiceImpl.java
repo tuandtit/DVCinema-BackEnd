@@ -40,7 +40,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .movie(movie)
                 .room(room)
                 .showDate(dto.getShowDate())
-                .showTime(dto.getShowTime())
+                .startTime(dto.getShowTime())
                 .ticketPrice(dto.getTicketPrice())
                 .isActive(true)
                 .build();
@@ -68,6 +68,13 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         showtimeRepository.deleteById(id);
     }
 
+    @Override
+    public List<ShowtimeResponseDto> getByMovieId(Long id) {
+        return showtimeRepository.findByMovieId(id).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
     private ShowtimeResponseDto mapToDto(ShowtimeEntity entity) {
         return ShowtimeResponseDto.builder()
                 .id(entity.getId())
@@ -78,7 +85,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .cinemaId(entity.getRoom().getCinema().getId())
                 .cinemaName(entity.getRoom().getCinema().getName())
                 .showDate(entity.getShowDate())
-                .showTime(entity.getShowTime())
+                .startTime(entity.getStartTime())
                 .ticketPrice(entity.getTicketPrice())
                 .build();
     }

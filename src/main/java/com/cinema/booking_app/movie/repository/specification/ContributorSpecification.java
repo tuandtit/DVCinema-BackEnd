@@ -1,5 +1,6 @@
 package com.cinema.booking_app.movie.repository.specification;
 
+import com.cinema.booking_app.common.enums.ContributorType;
 import com.cinema.booking_app.common.utils.TextUtils;
 import com.cinema.booking_app.movie.entity.ContributorEntity;
 import jakarta.persistence.criteria.Predicate;
@@ -17,6 +18,7 @@ public final class ContributorSpecification {
 
     private static final String FIELD_STAGE_NAME = "stageName";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_CONTRIBUTOR_TYPE = "contributorType";
 
     private final List<Specification<ContributorEntity>> specifications = new ArrayList<>();
 
@@ -38,6 +40,16 @@ public final class ContributorSpecification {
                                             TextUtils.like(keyword)
                                     )
                             )
+            );
+        }
+        return this;
+    }
+
+    public ContributorSpecification withContributorType(final ContributorType type) {
+        if (!ObjectUtils.isEmpty(type)) {
+            specifications.add(
+                    (root, query, cb) ->
+                            cb.equal(root.get(FIELD_CONTRIBUTOR_TYPE),type)
             );
         }
         return this;

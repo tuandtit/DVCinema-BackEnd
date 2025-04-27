@@ -16,24 +16,20 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MovieSpecification {
     private static final String FIELD_TITLE = "title";
-    private static final String FIELD_DESC = "description";
-    private static final String FIELD_STATUS = "movieStatus";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_IS_AVAILABLE_ONLINE = "isAvailableOnline";
     private final List<Specification<MovieEntity>> specifications = new ArrayList<>();
 
     public static MovieSpecification builder() {
         return new MovieSpecification();
     }
 
-    public MovieSpecification withTitleOrDescription(final String keyword) {
+    public MovieSpecification withTitle(final String keyword) {
         if (!ObjectUtils.isEmpty(keyword)) {
             specifications.add(
                     (root, query, cb) ->
-                            cb.or(
-                                    cb.like(cb.lower(cb.function("unaccent", String.class, root.get(FIELD_TITLE))),
-                                            TextUtils.like(keyword)),
-                                    cb.like(cb.lower(cb.function("unaccent", String.class, root.get(FIELD_DESC))),
-                                            TextUtils.like(keyword))
-                            )
+                            cb.like(cb.lower(cb.function("unaccent", String.class, root.get(FIELD_TITLE))),
+                                    TextUtils.like(keyword))
             );
         }
         return this;
@@ -44,6 +40,16 @@ public final class MovieSpecification {
             specifications.add(
                     (root, query, criteriaBuilder) ->
                             root.get(FIELD_STATUS).in(statuses)
+            );
+        }
+        return this;
+    }
+
+    public MovieSpecification withIsOnline(final Boolean availableOnline) {
+        if (!ObjectUtils.isEmpty(availableOnline)) {
+            specifications.add(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.equal(root.get(FIELD_IS_AVAILABLE_ONLINE), availableOnline)
             );
         }
         return this;

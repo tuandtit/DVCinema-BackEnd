@@ -1,5 +1,6 @@
 package com.cinema.booking_app.movie.service.impl;
 
+import com.cinema.booking_app.common.base.service.CloudinaryService;
 import com.cinema.booking_app.common.enums.ContributorType;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.movie.entity.ContributorEntity;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ public class MovieServiceImpl implements MovieService {
     MovieRepository movieRepository;
     ContributorRepository contributorRepository;
     GenreRepository genreRepository;
+    CloudinaryService cloudinaryService;
 
     MovieMapper movieMapper;
 
@@ -46,9 +49,15 @@ public class MovieServiceImpl implements MovieService {
 
         MovieEntity movieEntity = movieMapper.toEntity(dto);
 
+        validateDuplicateName(dto.getTitle(), dto.getDirectorId());
         movieEntity.setDirector(director);
         movieEntity.setActors(actors);
         movieEntity.setGenres(genreEntities);
+        try {
+            movieEntity.setPosterUrl(cloudinaryService.uploadImage(dto.getPoster()));
+        } catch (IOException e) {
+            throw new BusinessException("400", e.getMessage());
+        }
 
         movieRepository.save(movieEntity);
         return movieMapper.toDto(movieEntity);
@@ -119,5 +128,12 @@ public class MovieServiceImpl implements MovieService {
                 .map(id -> genreRepository.findById(id)
                         .orElseThrow(() -> new BusinessException(String.valueOf(HttpStatus.NOT_FOUND.value()), "Không tìm thấy thể loại phim với id: " + id)))
                 .collect(Collectors.toSet());
+    }
+
+    private void validateDuplicateName(String name, Long directorId) {
+        if (movieRepository.existsByTitleAndDirectorId(name, directorId)) {
+            throw new BusinessException(String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                    "Đã tồn tại phim với cùng tiêu đề của cùng đạo diễn: " + name);
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.cinema.booking_app.common.enums.MovieStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -33,7 +34,8 @@ public class MovieRequestDto {
     @NotNull(message = "Trạng thái xem online phải được xác định")
     Boolean isAvailableOnline;
 
-    String posterUrl;
+    @NotNull(message = "Phim phải có poster")
+    MultipartFile poster;
 
     String trailerUrl;
 

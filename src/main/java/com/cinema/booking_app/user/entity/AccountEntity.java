@@ -49,12 +49,12 @@ public class AccountEntity extends AbstractAuditingEntity<Long> {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status")
     private AccountStatus status;
 
     @Column(name = "auth_provider")
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     AuthProvider authProvider = AuthProvider.EMAIL_AND_PASSWORD;
 

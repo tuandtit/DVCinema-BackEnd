@@ -22,6 +22,6 @@ public class ShowtimeResponseDto {
     Long cinemaId;
     String cinemaName;
     LocalDate showDate;
-    LocalTime showTime;
+    LocalTime startTime;
     BigDecimal ticketPrice;
 }

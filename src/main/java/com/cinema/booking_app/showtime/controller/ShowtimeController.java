@@ -1,11 +1,11 @@
 package com.cinema.booking_app.showtime.controller;
 
+import com.cinema.booking_app.common.base.dto.response.Response;
 import com.cinema.booking_app.showtime.dto.request.ShowtimeRequestDto;
 import com.cinema.booking_app.showtime.dto.response.ShowtimeResponseDto;
 import com.cinema.booking_app.showtime.service.ShowtimeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,23 +18,28 @@ public class ShowtimeController {
     private final ShowtimeService showtimeService;
 
     @PostMapping
-    public ResponseEntity<ShowtimeResponseDto> create(@RequestBody @Valid ShowtimeRequestDto dto) {
-        return ResponseEntity.ok(showtimeService.create(dto));
+    public Response<ShowtimeResponseDto> create(@RequestBody @Valid ShowtimeRequestDto dto) {
+        return Response.ok(showtimeService.create(dto));
     }
 
-    @GetMapping
-    public ResponseEntity<List<ShowtimeResponseDto>> getAll() {
-        return ResponseEntity.ok(showtimeService.getAll());
+    @GetMapping("/get-all")
+    public Response<List<ShowtimeResponseDto>> getAll() {
+        return Response.ok(showtimeService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ShowtimeResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(showtimeService.getById(id));
+    public Response<ShowtimeResponseDto> getById(@PathVariable Long id) {
+        return Response.ok(showtimeService.getById(id));
+    }
+
+    @GetMapping("")
+    public Response<List<ShowtimeResponseDto>> getByMovieId(@RequestParam("movieId") Long id) {
+        return Response.ok(showtimeService.getByMovieId(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public Response<Void> delete(@PathVariable Long id) {
         showtimeService.delete(id);
-        return ResponseEntity.noContent().build();
+        return Response.noContent();
     }
 }

@@ -34,7 +34,7 @@ public interface BookingMapper {
 
     @Named("mapShowDateTime")
     default LocalDateTime mapShowDateTime(ShowtimeEntity showtime) {
-        return LocalDateTime.of(showtime.getShowDate(), showtime.getShowTime());
+        return LocalDateTime.of(showtime.getShowDate(), showtime.getStartTime());
     }
 
     @Named("mapSeats")

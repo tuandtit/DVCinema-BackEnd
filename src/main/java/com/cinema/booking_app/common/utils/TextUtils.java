@@ -12,7 +12,12 @@ public class TextUtils {
     }
 
     private static String removeVietnameseAccent(String input) {
+        if (input == null) return null;
+
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        String noDiacritics = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return noDiacritics
+                .replace("đ", "d")
+                .replace("Đ", "D");
     }
 }

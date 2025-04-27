@@ -17,14 +17,16 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MovieSearchRequest extends FilterRequest<MovieEntity> {
-    String keyword;
+    String query;
+    Boolean isAvailableOnline;
     List<MovieStatus> status = new ArrayList<>();
 
     @Override
     public Specification<MovieEntity> specification() {
         return MovieSpecification.builder()
-                .withTitleOrDescription(keyword)
+                .withTitle(query)
                 .withStatuses(status)
+                .withIsOnline(isAvailableOnline)
                 .build();
     }
 }

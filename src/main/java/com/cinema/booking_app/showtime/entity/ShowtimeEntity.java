@@ -32,8 +32,8 @@ public class ShowtimeEntity extends AbstractAuditingEntity<Long> {
     @Column(name = "show_date")
     private LocalDate showDate;
 
-    @Column(nullable = false)
-    private LocalTime showTime;
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
 
     @Column(nullable = false)
     private BigDecimal ticketPrice;

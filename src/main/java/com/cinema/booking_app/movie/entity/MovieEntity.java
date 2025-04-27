@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.SQLDelete;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
@@ -19,7 +18,9 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tbl_movies")
+@Table(name = "tbl_movies", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"title", "director_id"})
+})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MovieEntity extends AbstractAuditingEntity<Long> {
     @Column(name = "title")
@@ -47,7 +48,7 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
     String videoUrl;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status")
     MovieStatus status;
 

@@ -102,8 +102,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         saveRefreshToken(account, jwtRefreshToken);
         //Creating the cookie
         createRefreshTokenCookie(response, jwtRefreshToken);
-
-        return accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
+        AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
+        dto.setDisplayName(account.getDisplayName());
+        return dto;
     }
 
     @Override

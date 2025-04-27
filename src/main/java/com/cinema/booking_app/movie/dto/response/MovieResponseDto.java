@@ -19,23 +19,21 @@ public class MovieResponseDto {
 
     String description;
 
+    String posterUrl;
+
+    String trailerUrl;
+
+    Set<String> actorNames;
+
+    String directorName;
+
     Integer duration; // phút
 
     LocalDate releaseDate;
 
     Boolean isAvailableOnline;
 
-    String posterUrl;
-
-    String trailerUrl;
-
-    String videoUrl;
-
     MovieStatus status; // COMING_SOON, NOW_SHOWING, ENDED
 
-    ContributorResponseDto director;
-
-    Set<ContributorResponseDto> actors;
-
-    Set<GenreResponseDto> genres;
+    Set<String> genreNames;
 }
