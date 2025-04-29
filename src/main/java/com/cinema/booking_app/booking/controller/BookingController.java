@@ -6,10 +6,7 @@ import com.cinema.booking_app.booking.service.BookingService;
 import com.cinema.booking_app.common.base.dto.response.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -22,8 +19,8 @@ public class BookingController {
         return Response.ok(bookingService.createBooking(request));
     }
 
-    @GetMapping("/user/{userId}")
-    public Response<List<BookingResponseDto>> getUserBookings(@PathVariable Long userId) {
-        return Response.ok(bookingService.getUserBookings(userId));
+    @GetMapping("/{bookingCode}")
+    public Response<BookingResponseDto> getBookingByCode(@PathVariable String bookingCode) {
+        return Response.ok(bookingService.getBookingByCode(bookingCode));
     }
 }

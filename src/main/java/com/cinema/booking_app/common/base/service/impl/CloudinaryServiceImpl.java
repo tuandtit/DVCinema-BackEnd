@@ -1,5 +1,6 @@
-package com.cinema.booking_app.common.base.service;
+package com.cinema.booking_app.common.base.service.impl;
 
+import com.cinema.booking_app.common.base.service.CloudinaryService;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

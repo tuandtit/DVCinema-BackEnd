@@ -43,4 +43,7 @@ public class BookingEntity extends AbstractAuditingEntity<Long> {
 
     @Column(name = "payment_status")
     String paymentStatus;
+
+    @Column(name = "booking_url")
+    String bookingUrl;
 }

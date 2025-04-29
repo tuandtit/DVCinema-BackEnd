@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vé Xem Phim - DVCinema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            color: #D32F2F;
+        }
+        .qr-code {
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <h2 class="header">🎬 DVCinema - Vé Xem Phim</h2>
+    <p>Xin chào,</p>
+    <p>Bạn đã đặt vé thành công tại <strong>DVCinema</strong>!</p>
+    <p>Vui lòng sử dụng mã QR dưới đây để vào rạp:</p>
+
+    <img class="qr-code" th:src="${qrImageUrl}" alt="QR Code"/>
+
+    <p style="text-align:center;">Chúc bạn có trải nghiệm xem phim tuyệt vời! 🍿</p>
+
+    <div class="footer">
+        © 2025 DVCinema. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

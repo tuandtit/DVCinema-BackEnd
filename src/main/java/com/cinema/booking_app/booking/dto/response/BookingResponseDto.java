@@ -5,7 +5,8 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -13,12 +14,13 @@ import java.util.List;
 public class BookingResponseDto {
     private Long id;
     private String bookingCode;
-    private Long showtimeId;
+    private String bookingUrl;
     private String movieTitle;
     private String roomName;
-    private LocalDateTime showDateTime;
+    private LocalDate showDate;
+    private LocalTime showTime;
     private Long userId;
-    private List<String> seats;
+    private List<TicketResponseDto> tickets;
     private BigDecimal totalPrice;
     private String paymentStatus;
     private Instant createdDate;

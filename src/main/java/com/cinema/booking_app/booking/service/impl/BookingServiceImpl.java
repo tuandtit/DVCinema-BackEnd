@@ -8,6 +8,8 @@ import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
 import com.cinema.booking_app.booking.repository.TicketRepository;
 import com.cinema.booking_app.booking.service.BookingService;
+import com.cinema.booking_app.common.base.service.impl.MailService;
+import com.cinema.booking_app.common.base.service.impl.QRCodeService;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.room.entity.SeatEntity;
 import com.cinema.booking_app.room.repository.SeatRepository;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +41,8 @@ public class BookingServiceImpl implements BookingService {
     AccountRepository accountRepository;
     SeatRepository seatRepository;
     BookingMapper bookingMapper;
+    QRCodeService qrCodeService;
+    MailService mailService;
 
     @Override
     @Transactional
@@ -55,7 +60,7 @@ public class BookingServiceImpl implements BookingService {
                 .toList();
         List<Long> requestedSeatIds = request.getSeatIds();
         if (bookedSeatIds.stream().anyMatch(requestedSeatIds::contains)) {
-            throw new BusinessException("404", "Ghế đã được đặt trước đó");
+            throw new BusinessException("400", "Ghế đã được đặt trước đó");
         }
 
         // Kiểm tra tổng giá
@@ -94,14 +99,22 @@ public class BookingServiceImpl implements BookingService {
         // Lưu booking
         booking = bookingRepository.save(booking);
 
+        try {
+            booking.setBookingUrl(qrCodeService.generateAndUploadQRCode(booking.getBookingCode()));
+            mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
+        } catch (IOException e) {
+            throw new BusinessException("400", "Có lỗi khi tạo mã qr và upload");
+        }
+
         // Ánh xạ sang DTO
         return bookingMapper.toDto(booking);
     }
 
     @Override
-    public List<BookingResponseDto> getUserBookings(Long userId) {
-        List<BookingEntity> bookings = bookingRepository.findByUserId(userId);
-        return bookingMapper.toDtoList(bookings);
+    public BookingResponseDto getBookingByCode(String bookingCode) {
+        BookingEntity booking = bookingRepository.findByBookingCode(bookingCode)
+                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy đơn đặt vé nào"));
+        return bookingMapper.toDto(booking);
     }
 
     private String generateBookingCode() {
