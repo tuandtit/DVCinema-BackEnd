@@ -7,6 +7,4 @@ public interface BookingService {
     BookingResponseDto createBooking(BookingRequestDto request);
 
     BookingResponseDto getBookingByCode(String bookingCode);
-
-
 }

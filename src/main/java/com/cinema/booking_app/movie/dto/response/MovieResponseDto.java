@@ -23,6 +23,8 @@ public class MovieResponseDto {
 
     String trailerUrl;
 
+    String videoUrl;
+
     Set<String> actorNames;
 
     String directorName;

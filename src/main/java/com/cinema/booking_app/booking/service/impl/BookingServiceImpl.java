@@ -8,6 +8,7 @@ import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
 import com.cinema.booking_app.booking.repository.TicketRepository;
 import com.cinema.booking_app.booking.service.BookingService;
+import com.cinema.booking_app.common.base.service.CloudinaryService;
 import com.cinema.booking_app.common.base.service.impl.MailService;
 import com.cinema.booking_app.common.base.service.impl.QRCodeService;
 import com.cinema.booking_app.common.error.BusinessException;
@@ -41,6 +42,7 @@ public class BookingServiceImpl implements BookingService {
     AccountRepository accountRepository;
     SeatRepository seatRepository;
     BookingMapper bookingMapper;
+    CloudinaryService cloudinaryService;
     QRCodeService qrCodeService;
     MailService mailService;
 
@@ -48,16 +50,12 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto createBooking(BookingRequestDto request) {
         // Kiểm tra user và showtime
-        AccountEntity user = accountRepository.findById(request.getUserId())
-                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy người dùng"));
-        ShowtimeEntity showtime = showtimeRepository.findById(request.getShowtimeId())
-                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy lịch chiếu"));
+        AccountEntity user = getUserById(request.getUserId());
+        ShowtimeEntity showtime = getShowtimeById(request.getShowtimeId());
 
         // Kiểm tra ghế trống
-        List<Long> bookedSeatIds = ticketRepository.findByShowtimeId(request.getShowtimeId())
-                .stream()
-                .map(ticket -> ticket.getSeat().getId())
-                .toList();
+        List<Long> bookedSeatIds = getBookedSeatIds(request.getShowtimeId());
+
         List<Long> requestedSeatIds = request.getSeatIds();
         if (bookedSeatIds.stream().anyMatch(requestedSeatIds::contains)) {
             throw new BusinessException("400", "Ghế đã được đặt trước đó");
@@ -79,6 +77,7 @@ public class BookingServiceImpl implements BookingService {
                 .showtime(showtime)
                 .totalPrice(request.getTotalPrice())
                 .paymentStatus("PENDING")
+                .isUsed(false)
                 .build();
 
         // Tạo tickets
@@ -110,11 +109,30 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toDto(booking);
     }
 
+    private List<Long> getBookedSeatIds(Long showtimeId) {
+        return ticketRepository.findByShowtimeId(showtimeId)
+                .stream()
+                .map(ticket -> ticket.getSeat().getId())
+                .toList();
+    }
+
+    private ShowtimeEntity getShowtimeById(Long showtimeId) {
+        return showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy lịch chiếu"));
+    }
+
+    private AccountEntity getUserById(Long userId) {
+        return accountRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy người dùng"));
+    }
+
     @Override
     public BookingResponseDto getBookingByCode(String bookingCode) {
         BookingEntity booking = bookingRepository.findByBookingCode(bookingCode)
                 .orElseThrow(() -> new BusinessException("404", "Không tìm thấy đơn đặt vé nào"));
-        return bookingMapper.toDto(booking);
+        booking.setUsed(true);
+        cloudinaryService.deleteFile(booking.getBookingUrl());
+        return bookingMapper.toDto(bookingRepository.save(booking));
     }
 
     private String generateBookingCode() {
