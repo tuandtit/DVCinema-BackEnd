@@ -77,8 +77,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AccountDto signIn(SignInRequest request, HttpServletResponse response) {
         final var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                request.username(),
-                request.password()
+                request.username().trim(),
+                request.password().trim()
         );
 
         final var authentication = authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);

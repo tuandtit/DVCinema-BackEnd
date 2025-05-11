@@ -14,5 +14,5 @@ public interface ShowtimeService {
 
     void delete(Long id);
 
-    List<ShowtimeResponseDto> getByMovieId(Long id);
+    List<ShowtimeResponseDto> getByMovieIdAndCinemaId(Long movieId, Long cinemaId);
 }

@@ -35,9 +35,6 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
     @Column(name = "release_date")
     LocalDate releaseDate;
 
-    @Column(name = "is_available_online")
-    Boolean isAvailableOnline;
-
     @Column(name = "poster_url")
     String posterUrl;
 
@@ -48,7 +45,7 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
     String videoUrl;
 
     @Enumerated(EnumType.STRING)
-//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status")
     MovieStatus status;
 

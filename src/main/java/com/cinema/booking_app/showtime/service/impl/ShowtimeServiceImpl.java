@@ -31,19 +31,10 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     public ShowtimeResponseDto create(ShowtimeRequestDto dto) {
-        MovieEntity movie = movieRepository.findById(dto.getMovieId())
-                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy phim với id " + dto.getMovieId()));
-        RoomEntity room = roomRepository.findById(dto.getRoomId())
-                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy phòng chiếu với id " + dto.getRoomId()));
+        MovieEntity movie = movieRepository.findById(dto.getMovieId()).orElseThrow(() -> new BusinessException("404", "Không tìm thấy phim với id " + dto.getMovieId()));
+        RoomEntity room = roomRepository.findById(dto.getRoomId()).orElseThrow(() -> new BusinessException("404", "Không tìm thấy phòng chiếu với id " + dto.getRoomId()));
 
-        ShowtimeEntity showtime = ShowtimeEntity.builder()
-                .movie(movie)
-                .room(room)
-                .showDate(dto.getShowDate())
-                .startTime(dto.getShowTime())
-                .ticketPrice(dto.getTicketPrice())
-                .isActive(true)
-                .build();
+        ShowtimeEntity showtime = ShowtimeEntity.builder().movie(movie).room(room).showDate(dto.getShowDate()).startTime(dto.getShowTime()).ticketPrice(dto.getTicketPrice()).isActive(true).build();
 
         ShowtimeEntity saved = showtimeRepository.save(showtime);
         return mapToDto(saved);
@@ -51,16 +42,12 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     public List<ShowtimeResponseDto> getAll() {
-        return showtimeRepository.findAll().stream()
-                .map(this::mapToDto)
-                .toList();
+        return showtimeRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
     public ShowtimeResponseDto getById(Long id) {
-        return showtimeRepository.findById(id)
-                .map(this::mapToDto)
-                .orElseThrow(() -> new BusinessException("404", "Không tìm thấy lịch chiếu có id: " + id));
+        return showtimeRepository.findById(id).map(this::mapToDto).orElseThrow(() -> new BusinessException("404", "Không tìm thấy lịch chiếu có id: " + id));
     }
 
     @Override
@@ -69,10 +56,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     }
 
     @Override
-    public List<ShowtimeResponseDto> getByMovieId(Long id) {
-        return showtimeRepository.findByMovieId(id).stream()
-                .map(this::mapToDto)
-                .toList();
+    public List<ShowtimeResponseDto> getByMovieIdAndCinemaId(Long movieId, Long cinemaId) {
+        return showtimeRepository.findByMovieIdAndCinemaId(movieId, cinemaId).stream()
+                .map(this::mapToDto).toList();
     }
 
     private ShowtimeResponseDto mapToDto(ShowtimeEntity entity) {

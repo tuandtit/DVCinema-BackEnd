@@ -60,6 +60,7 @@ public class RoomServiceImpl implements RoomService {
                 .toList();
 
         room.setRows(rows);
+        room.setIsActive(true);
 
         return saveAndReturnDto(room);
     }

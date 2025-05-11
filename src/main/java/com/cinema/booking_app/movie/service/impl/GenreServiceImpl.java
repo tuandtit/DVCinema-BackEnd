@@ -27,6 +27,7 @@ public class GenreServiceImpl implements GenreService {
     public GenreResponseDto create(GenreRequestDto dto) {
         GenreEntity entity = GenreEntity.builder()
                 .name(dto.getName())
+                .isActive(true)
                 .build();
         return toDto(genreRepository.save(entity));
     }

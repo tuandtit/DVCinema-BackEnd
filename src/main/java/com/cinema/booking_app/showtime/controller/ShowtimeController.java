@@ -33,8 +33,8 @@ public class ShowtimeController {
     }
 
     @GetMapping("")
-    public Response<List<ShowtimeResponseDto>> getByMovieId(@RequestParam("movieId") Long id) {
-        return Response.ok(showtimeService.getByMovieId(id));
+    public Response<List<ShowtimeResponseDto>> getByMovieIdAndCinemaId(@RequestParam("movieId") Long movieId, @RequestParam("cinemaId") Long cinemaId) {
+        return Response.ok(showtimeService.getByMovieIdAndCinemaId(movieId, cinemaId));
     }
 
     @DeleteMapping("/{id}")

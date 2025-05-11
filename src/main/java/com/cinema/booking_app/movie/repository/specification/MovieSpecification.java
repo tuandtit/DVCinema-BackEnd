@@ -45,16 +45,6 @@ public final class MovieSpecification {
         return this;
     }
 
-    public MovieSpecification withIsOnline(final Boolean availableOnline) {
-        if (!ObjectUtils.isEmpty(availableOnline)) {
-            specifications.add(
-                    (root, query, criteriaBuilder) ->
-                            criteriaBuilder.equal(root.get(FIELD_IS_AVAILABLE_ONLINE), availableOnline)
-            );
-        }
-        return this;
-    }
-
     public Specification<MovieEntity> build() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.and(specifications.stream()
                 .filter(Objects::nonNull)
