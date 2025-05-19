@@ -4,6 +4,7 @@ import com.cinema.booking_app.common.base.dto.response.Response;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
+import com.cinema.booking_app.room.dto.response.SeatsDto;
 import com.cinema.booking_app.room.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,9 @@ public class RoomController {
         return Response.noContent();
     }
 
-    @GetMapping("/{id}")
-    public Response<RoomResponseDto> getById(@PathVariable Long id) {
-        return Response.ok(service.getById(id));
+    @GetMapping("/seats-of-room")
+    public Response<List<SeatsDto>> getSeatsById(@RequestParam Long roomId) {
+        return Response.ok(service.getSeatsByRoomId(roomId));
     }
 
     @GetMapping("")

@@ -7,6 +7,8 @@ import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
+import com.cinema.booking_app.room.dto.response.SeatDto;
+import com.cinema.booking_app.room.dto.response.SeatsDto;
 import com.cinema.booking_app.room.entity.RoomEntity;
 import com.cinema.booking_app.room.entity.RowEntity;
 import com.cinema.booking_app.room.entity.SeatEntity;
@@ -19,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -83,9 +86,27 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public RoomResponseDto getById(Long id) {
+    public List<SeatsDto> getSeatsByRoomId(Long id) {
         RoomEntity room = existsRoom(id);
-        return roomMapper.toDto(room);
+        RoomResponseDto roomResponseDto = roomMapper.toDto(room);
+        List<SeatsDto> dtoList = new ArrayList<>();
+        for (var row : roomResponseDto.getRows()) {
+            List<SeatDto> seats = new ArrayList<>();
+            for (var seat : row.getSeats()) {
+                SeatDto seatDto = SeatDto.builder()
+                        .seatId(seat.getId())
+                        .seatName(row.getLabel() + seat.getSeatNumber())
+                        .isBooked(seat.isBooked())
+                        .build();
+                seats.add(seatDto);
+            }
+            SeatsDto seatsDto = SeatsDto.builder()
+                    .rowId(row.getId())
+                    .seats(seats)
+                    .build();
+            dtoList.add(seatsDto);
+        }
+        return dtoList;
     }
 
     @Override

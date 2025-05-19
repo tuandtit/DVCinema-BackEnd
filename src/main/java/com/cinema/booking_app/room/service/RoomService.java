@@ -3,6 +3,7 @@ package com.cinema.booking_app.room.service;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
+import com.cinema.booking_app.room.dto.response.SeatsDto;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface RoomService {
 
     void delete(Long id);
 
-    RoomResponseDto getById(Long id);
+    List<SeatsDto> getSeatsByRoomId(Long id);
 
     List<RoomResponseDto> getAll();
 }

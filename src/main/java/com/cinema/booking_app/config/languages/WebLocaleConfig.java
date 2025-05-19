@@ -1,6 +1,7 @@
 package com.cinema.booking_app.config.languages;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,8 @@ public class WebLocaleConfig implements WebMvcConfigurer {
     public LocaleResolver localeResolver() {
         return new AcceptHeaderLocaleResolver() {
             @Override
-            public Locale resolveLocale(HttpServletRequest request) {
+            @NonNull
+            public Locale resolveLocale(@NonNull HttpServletRequest request) {
                 String headerLang = request.getHeader("Accept-Language");
                 if (!StringUtils.hasText(headerLang)) {
                     return new Locale("vi"); // Mặc định là tiếng Việt

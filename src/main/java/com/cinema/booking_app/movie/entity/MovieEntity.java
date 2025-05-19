@@ -45,7 +45,7 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
     String videoUrl;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status")
     MovieStatus status;
 
