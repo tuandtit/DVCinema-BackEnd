@@ -18,6 +18,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MovieSearchRequest extends FilterRequest<MovieEntity> {
     String query;
+    Long genreId;
     List<MovieStatus> status = new ArrayList<>();
 
     @Override
@@ -25,6 +26,7 @@ public class MovieSearchRequest extends FilterRequest<MovieEntity> {
         return MovieSpecification.builder()
                 .withTitle(query)
                 .withStatuses(status)
+                .withGenreId(genreId)
                 .build();
     }
 }

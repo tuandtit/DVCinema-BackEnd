@@ -2,7 +2,10 @@ package com.cinema.booking_app.movie.repository.specification;
 
 import com.cinema.booking_app.common.enums.MovieStatus;
 import com.cinema.booking_app.common.utils.TextUtils;
+import com.cinema.booking_app.movie.entity.GenreEntity;
 import com.cinema.booking_app.movie.entity.MovieEntity;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -17,7 +20,6 @@ import java.util.Objects;
 public final class MovieSpecification {
     private static final String FIELD_TITLE = "title";
     private static final String FIELD_STATUS = "status";
-    private static final String FIELD_IS_AVAILABLE_ONLINE = "isAvailableOnline";
     private final List<Specification<MovieEntity>> specifications = new ArrayList<>();
 
     public static MovieSpecification builder() {
@@ -40,6 +42,22 @@ public final class MovieSpecification {
             specifications.add(
                     (root, query, criteriaBuilder) ->
                             root.get(FIELD_STATUS).in(statuses)
+            );
+        }
+        return this;
+    }
+
+    public MovieSpecification withGenreId(final Long genreId) {
+        if (!ObjectUtils.isEmpty(genreId)) {
+            specifications.add(
+                    (root, query, criteriaBuilder) -> {
+                        Join<MovieEntity, GenreEntity> genreJoin = root.join("genres", JoinType.INNER);
+
+                        return criteriaBuilder.and(
+                                criteriaBuilder.equal(genreJoin.get("id"), genreId),
+                                criteriaBuilder.isTrue(genreJoin.get("isActive"))
+                        );
+                    }
             );
         }
         return this;
