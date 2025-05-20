@@ -14,5 +14,8 @@ public class SeatResponseDto {
     Long id;
     String seatNumber;
     SeatType seatType;
+    boolean isHeld;
     boolean isBooked;
+    boolean selected;
+    Long selectedByUserId;
 }

@@ -52,6 +52,8 @@ public class RoomServiceImpl implements RoomService {
                     List<SeatEntity> seats = IntStream.range(1, dto.getSeatsPerRow() + 1) // Dùng IntStream cho seats
                             .mapToObj(j -> SeatEntity.builder()
                                     .seatNumber(String.valueOf(j))
+                                    .isBooked(false)
+                                    .isHeld(false)
                                     .seatType(SeatType.SINGLE)
                                     .row(row)
                                     .build())
@@ -97,6 +99,9 @@ public class RoomServiceImpl implements RoomService {
                         .seatId(seat.getId())
                         .seatName(row.getLabel() + seat.getSeatNumber())
                         .isBooked(seat.isBooked())
+                        .isHeld(seat.isHeld())
+                        .selected(seat.isSelected())
+                        .selectedByUserId(seat.getSelectedByUserId())
                         .build();
                 seats.add(seatDto);
             }

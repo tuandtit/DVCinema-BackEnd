@@ -20,6 +20,9 @@ public class PagingRequest {
     private Map<String, String> orders = new HashMap<>();
 
     public Pageable pageable() {
+        page = Math.max(page, 1);
+        size = Math.max(size, 1);
+        size = Math.min(size, 24);
         if (CollectionUtils.isEmpty(orders)) {
             return PageRequest.of(page - 1, size);
         }

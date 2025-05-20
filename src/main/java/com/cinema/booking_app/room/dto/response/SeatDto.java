@@ -13,4 +13,7 @@ public class SeatDto {
     Long seatId;
     String seatName;
     Boolean isBooked;
+    Boolean isHeld;
+    Boolean selected;
+    Long selectedByUserId;
 }

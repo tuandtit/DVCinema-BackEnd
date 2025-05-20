@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,4 +23,10 @@ public class SeatRequestDto {
 
     @NotNull(message = "Ghế xem phim phải thuộc 1 hàng ghế")
     Long rowId;
+
+    Boolean isBooked = false;
+
+    Boolean isHeld = false;
+
+    List<Long> seatIds;
 }
