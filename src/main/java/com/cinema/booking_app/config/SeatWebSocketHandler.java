@@ -26,16 +26,16 @@ public class SeatWebSocketHandler extends TextWebSocketHandler {
         // Đăng ký module JavaTimeModule để hỗ trợ Java 8 date/time
         objectMapper.registerModule(new JavaTimeModule());
     }
+
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
-        String roomId = getRoomIdFromSession(session);
-        if (roomId == null) {
-            session.close(CloseStatus.BAD_DATA.withReason("roomId is required"));
+        String showtimeId = getShowtimeIdFromSession(session);
+        if (showtimeId == null) {
+            session.close(CloseStatus.BAD_DATA.withReason("showtimeId is required"));
             return;
         }
-
-        sessionsByRoom.computeIfAbsent(roomId, k -> new CopyOnWriteArrayList<>()).add(session);
-        System.out.println("Client connected to room: " + roomId);
+        sessionsByRoom.computeIfAbsent(showtimeId.trim(), k -> new CopyOnWriteArrayList<>()).add(session);
+        System.out.println("Client connected to room: " + showtimeId + "session: " + session.getId() + ", total sessions: " + sessionsByRoom.get(showtimeId).size());
     }
 
     @Override
@@ -43,9 +43,11 @@ public class SeatWebSocketHandler extends TextWebSocketHandler {
         // Có thể xử lý tin nhắn từ client nếu cần
     }
 
-    public void broadcastSeatUpdate(String roomId, SeatEntity seat) throws IOException {
+    public void broadcastSeatUpdate(String showtimeId, SeatEntity seat) throws IOException {
+        System.out.println("sessionsByRoom: " + sessionsByRoom);
         String seatUpdate = objectMapper.writeValueAsString(seat);
-        CopyOnWriteArrayList<WebSocketSession> sessions = sessionsByRoom.get(roomId);
+        CopyOnWriteArrayList<WebSocketSession> sessions = sessionsByRoom.get(showtimeId.trim());
+
         if (sessions != null) {
             for (WebSocketSession session : sessions) {
                 if (session.isOpen()) {
@@ -57,20 +59,20 @@ public class SeatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
-        String roomId = getRoomIdFromSession(session);
-        if (roomId != null) {
-            CopyOnWriteArrayList<WebSocketSession> sessions = sessionsByRoom.get(roomId);
+        String showtimeId = getShowtimeIdFromSession(session);
+        if (showtimeId != null) {
+            CopyOnWriteArrayList<WebSocketSession> sessions = sessionsByRoom.get(showtimeId);
             if (sessions != null) {
                 sessions.remove(session);
                 if (sessions.isEmpty()) {
-                    sessionsByRoom.remove(roomId);
+                    sessionsByRoom.remove(showtimeId);
                 }
             }
-            System.out.println("Client disconnected from room: " + roomId);
+            System.out.println("Client disconnected from room: " + showtimeId);
         }
     }
 
-    private String getRoomIdFromSession(WebSocketSession session) {
+    private String getShowtimeIdFromSession(WebSocketSession session) {
         URI uri = session.getUri();
         if (uri == null) {
             return null;
@@ -81,7 +83,7 @@ public class SeatWebSocketHandler extends TextWebSocketHandler {
         }
         for (String param : query.split("&")) {
             String[] pair = param.split("=");
-            if (pair.length == 2 && "roomId".equals(pair[0])) {
+            if (pair.length == 2 && "showtimeId".equals(pair[0])) {
                 return pair[1];
             }
         }

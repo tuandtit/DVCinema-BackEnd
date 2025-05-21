@@ -17,7 +17,7 @@ public interface SeatService {
 
     List<SeatResponseDto> getAll();
 
-    void holdSeat(Long userId, Long seatId);
+    void holdSeat(Long userId, Long seatId, Long showtimeId);
 
     void releaseSeatById(List<Long> seatIds);
 }

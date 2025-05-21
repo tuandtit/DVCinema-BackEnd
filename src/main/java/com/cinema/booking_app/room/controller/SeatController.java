@@ -45,8 +45,8 @@ public class SeatController {
     }
 
     @PostMapping("/hold-seat")
-    public Response<Void> holdSeats(@RequestParam Long userId, @RequestParam Long seatId) {
-        service.holdSeat(userId, seatId);
+    public Response<Void> holdSeats(@RequestParam Long userId, @RequestParam Long seatId, @RequestParam Long showtimeId) {
+        service.holdSeat(userId, seatId, showtimeId);
         return Response.noContent();
     }
 

@@ -11,6 +11,7 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountDto {
+    Long userId;
     String username;
     String displayName;
     String avatar;

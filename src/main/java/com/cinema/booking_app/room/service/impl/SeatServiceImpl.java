@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -76,18 +77,24 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public void holdSeat(Long userId, Long seatId) {
-        if (seatId == null || userId == null)
+    @Transactional
+    public void holdSeat(Long userId, Long seatId, Long showtimeId) {
+        if (seatId == null || userId == null || showtimeId == null)
             return;
-        SeatEntity seat = existsSeat(seatId);
+        SeatEntity seat = seatRepository.findByIdWithPessimisticLock(seatId)
+                .orElseThrow(() -> new BusinessException("404", "Seat not found"));
 
+        if (Boolean.TRUE.equals(seat.getIsHeld()) && !Objects.equals(seat.getSelectedByUserId(), userId))
+            throw new BusinessException("400", "Ghế này đang được giữ");
+        if (Boolean.TRUE.equals(seat.getIsBooked()))
+            throw new BusinessException("400", "Ghế này đã bán rồi");
         seat.setIsHeld(true);
         seat.setHeldUntil(OffsetDateTime.now().plusMinutes(10));
         seat.setSelectedByUserId(userId);
         seat.setSelected(true);
         seatRepository.save(seat);
         try {
-            seatWebSocketHandler.broadcastSeatUpdate(seat.getRow().getRoom().getId().toString(), seat);
+            seatWebSocketHandler.broadcastSeatUpdate(showtimeId.toString(), seat);
         } catch (IOException e) {
             throw new BusinessException("500", e.getMessage());
         }

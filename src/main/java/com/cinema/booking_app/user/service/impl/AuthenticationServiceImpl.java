@@ -1,14 +1,14 @@
 package com.cinema.booking_app.user.service.impl;
 
-import com.cinema.booking_app.user.service.AuthenticationService;
 import com.cinema.booking_app.common.enums.AccountStatus;
 import com.cinema.booking_app.common.enums.AuthProvider;
 import com.cinema.booking_app.common.enums.ERole;
+import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.config.languages.Translator;
-import com.cinema.booking_app.user.dto.response.AccountDto;
 import com.cinema.booking_app.user.dto.request.SignInGoogleRequest;
 import com.cinema.booking_app.user.dto.request.SignInRequest;
 import com.cinema.booking_app.user.dto.request.SignUpRequest;
+import com.cinema.booking_app.user.dto.response.AccountDto;
 import com.cinema.booking_app.user.entity.AccountEntity;
 import com.cinema.booking_app.user.entity.RefreshTokenEntity;
 import com.cinema.booking_app.user.entity.RoleEntity;
@@ -17,7 +17,7 @@ import com.cinema.booking_app.user.repository.AccountRepository;
 import com.cinema.booking_app.user.repository.RefreshTokenRepository;
 import com.cinema.booking_app.user.repository.RoleRepository;
 import com.cinema.booking_app.user.security.jwt.TokenProvider;
-import com.cinema.booking_app.common.error.BusinessException;
+import com.cinema.booking_app.user.service.AuthenticationService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.servlet.http.Cookie;
@@ -104,6 +104,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         createRefreshTokenCookie(response, jwtRefreshToken);
         AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
         dto.setDisplayName(account.getDisplayName());
+        dto.setUserId(account.getId());
         return dto;
     }
 
