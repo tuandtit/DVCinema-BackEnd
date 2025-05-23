@@ -13,8 +13,8 @@ public class Translator {
 
     private final ResourceBundleMessageSource messageSource;
 
-    public String toLocale(String msgCode) {
+    public String toLocale(String msgCode, Object ...args) {
         Locale locale = LocaleContextHolder.getLocale();
-        return messageSource.getMessage(msgCode, null, locale);
+        return messageSource.getMessage(msgCode, args, locale);
     }
 }

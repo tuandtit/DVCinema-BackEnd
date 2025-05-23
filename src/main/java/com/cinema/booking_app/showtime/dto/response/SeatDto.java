@@ -1,5 +1,6 @@
-package com.cinema.booking_app.room.dto.response;
+package com.cinema.booking_app.showtime.dto.response;
 
+import com.cinema.booking_app.common.enums.SeatStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,8 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class SeatDto {
     Long seatId;
     String seatName;
-    Boolean isBooked;
-    Boolean isHeld;
-    Boolean selected;
+    SeatStatus status;
     Long selectedByUserId;
 }

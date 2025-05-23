@@ -2,13 +2,14 @@ package com.cinema.booking_app.room.service.impl;
 
 import com.cinema.booking_app.cinema.entity.CinemaEntity;
 import com.cinema.booking_app.cinema.repository.CinemaRepository;
+import com.cinema.booking_app.common.enums.SeatStatus;
 import com.cinema.booking_app.common.enums.SeatType;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
-import com.cinema.booking_app.room.dto.response.SeatDto;
-import com.cinema.booking_app.room.dto.response.SeatsDto;
+import com.cinema.booking_app.showtime.dto.response.SeatDto;
+import com.cinema.booking_app.showtime.dto.response.SeatsDto;
 import com.cinema.booking_app.room.entity.RoomEntity;
 import com.cinema.booking_app.room.entity.RowEntity;
 import com.cinema.booking_app.room.entity.SeatEntity;
@@ -52,8 +53,6 @@ public class RoomServiceImpl implements RoomService {
                     List<SeatEntity> seats = IntStream.range(1, dto.getSeatsPerRow() + 1) // Dùng IntStream cho seats
                             .mapToObj(j -> SeatEntity.builder()
                                     .seatNumber(String.valueOf(j))
-                                    .isBooked(false)
-                                    .isHeld(false)
                                     .seatType(SeatType.SINGLE)
                                     .row(row)
                                     .build())
@@ -98,10 +97,7 @@ public class RoomServiceImpl implements RoomService {
                 SeatDto seatDto = SeatDto.builder()
                         .seatId(seat.getId())
                         .seatName(row.getLabel() + seat.getSeatNumber())
-                        .isBooked(seat.isBooked())
-                        .isHeld(seat.isHeld())
-                        .selected(seat.isSelected())
-                        .selectedByUserId(seat.getSelectedByUserId())
+                        .status(SeatStatus.AVAILABLE)
                         .build();
                 seats.add(seatDto);
             }

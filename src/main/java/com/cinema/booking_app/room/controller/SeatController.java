@@ -44,15 +44,4 @@ public class SeatController {
         return Response.ok(service.getAll());
     }
 
-    @PostMapping("/hold-seat")
-    public Response<Void> holdSeats(@RequestParam Long userId, @RequestParam Long seatId, @RequestParam Long showtimeId) {
-        service.holdSeat(userId, seatId, showtimeId);
-        return Response.noContent();
-    }
-
-    @PostMapping("/release-seats")
-    public Response<Void> releaseSeats(@RequestParam List<Long> seatIds) {
-        service.releaseSeatById(seatIds);
-        return Response.noContent();
-    }
 }

@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.OffsetDateTime;
-
 @Entity
 @Table(name = "tbl_seats", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"seatNumber", "row_id"})
@@ -33,16 +31,4 @@ public class SeatEntity extends AbstractAuditingEntity<Long> {
     @JoinColumn(name = "row_id")
     RowEntity row;
 
-    @Column(name = "is_booked")
-    Boolean isBooked = false;
-
-    Boolean isHeld = false;
-
-    Boolean selected = false;
-
-    @Column(name = "held_until")
-    OffsetDateTime heldUntil;
-
-    @Column(name = "selected_by_user_id")
-    Long selectedByUserId;
 }

@@ -64,7 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AccountDto signUp(SignUpRequest request) {
         if (accountRepository.existsByUsername(request.username())) {
-            throw new BusinessException(String.valueOf(HttpStatus.BAD_REQUEST.value()), translator.toLocale("error.username.exists"));
+            throw new BusinessException(String.valueOf(HttpStatus.BAD_REQUEST.value()), translator.toLocale("error.username.exists", request.username()));
         }
         final var entity = accountMapper.toEntity(request);
         RoleEntity role = roleRepository.findByName(ERole.USER).orElse(new RoleEntity(ERole.USER));

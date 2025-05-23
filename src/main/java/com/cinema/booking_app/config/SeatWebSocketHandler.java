@@ -1,6 +1,7 @@
 package com.cinema.booking_app.config;
 
 import com.cinema.booking_app.room.entity.SeatEntity;
+import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.NonNull;
@@ -43,7 +44,7 @@ public class SeatWebSocketHandler extends TextWebSocketHandler {
         // Có thể xử lý tin nhắn từ client nếu cần
     }
 
-    public void broadcastSeatUpdate(String showtimeId, SeatEntity seat) throws IOException {
+    public void broadcastSeatUpdate(String showtimeId, SeatShowtimeEntity seat) throws IOException {
         System.out.println("sessionsByRoom: " + sessionsByRoom);
         String seatUpdate = objectMapper.writeValueAsString(seat);
         CopyOnWriteArrayList<WebSocketSession> sessions = sessionsByRoom.get(showtimeId.trim());

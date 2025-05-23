@@ -1,6 +1,7 @@
 package com.cinema.booking_app.cinema.entity;
 
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,5 +24,6 @@ public class CityEntity extends AbstractAuditingEntity<Long> {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
+    @JsonIgnore
     private List<CinemaEntity> cinemas;
 }

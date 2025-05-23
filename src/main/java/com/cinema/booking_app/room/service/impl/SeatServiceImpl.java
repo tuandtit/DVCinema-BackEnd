@@ -34,7 +34,6 @@ public class SeatServiceImpl implements SeatService {
     RowRepository rowRepository;
     SeatRepository seatRepository;
     SeatMapper seatMapper;
-    SeatWebSocketHandler seatWebSocketHandler;
 
     @Override
     public SeatResponseDto create(SeatRequestDto dto) {
@@ -76,68 +75,7 @@ public class SeatServiceImpl implements SeatService {
         return seatMapper.toDto(seatRepository.findAll());
     }
 
-    @Override
-    @Transactional
-    public void holdSeat(Long userId, Long seatId, Long showtimeId) {
-        if (seatId == null || userId == null || showtimeId == null)
-            return;
-        SeatEntity seat = seatRepository.findByIdWithPessimisticLock(seatId)
-                .orElseThrow(() -> new BusinessException("404", "Seat not found"));
 
-        if (Boolean.TRUE.equals(seat.getIsHeld()) && !Objects.equals(seat.getSelectedByUserId(), userId))
-            throw new BusinessException("400", "Ghế này đang được giữ");
-        if (Boolean.TRUE.equals(seat.getIsBooked()))
-            throw new BusinessException("400", "Ghế này đã bán rồi");
-        seat.setIsHeld(true);
-        seat.setHeldUntil(OffsetDateTime.now().plusMinutes(10));
-        seat.setSelectedByUserId(userId);
-        seat.setSelected(true);
-        seatRepository.save(seat);
-        try {
-            seatWebSocketHandler.broadcastSeatUpdate(showtimeId.toString(), seat);
-        } catch (IOException e) {
-            throw new BusinessException("500", e.getMessage());
-        }
-
-    }
-
-    @Override
-    public void releaseSeatById(List<Long> seatIds) {
-        if (seatIds.isEmpty())
-            return;
-        List<SeatEntity> expiredSeats = seatRepository.findAllById(seatIds);
-        for (SeatEntity seat : expiredSeats) {
-            seat.setIsHeld(false);
-            seat.setHeldUntil(null);
-            seat.setSelectedByUserId(null);
-            seat.setSelected(false);
-            seatRepository.save(seat);
-            try {
-                seatWebSocketHandler.broadcastSeatUpdate(seat.getRow().getRoom().getId().toString(), seat);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Scheduled(fixedRate = 60000)
-    public void releaseExpiredSeats() {
-        List<SeatEntity> expiredSeats = seatRepository.findByIsHeldTrueAndHeldUntilBefore(OffsetDateTime.now());
-        if (expiredSeats.isEmpty())
-            return;
-        for (SeatEntity seat : expiredSeats) {
-            seat.setIsHeld(false);
-            seat.setHeldUntil(null);
-            seat.setSelectedByUserId(null);
-            seat.setSelected(false);
-            seatRepository.save(seat);
-            try {
-                seatWebSocketHandler.broadcastSeatUpdate(seat.getRow().getRoom().getId().toString(), seat);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private SeatEntity existsSeat(Long id) {
         return seatRepository.findById(id)

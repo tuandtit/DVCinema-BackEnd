@@ -2,6 +2,7 @@ package com.cinema.booking_app.room.entity;
 
 import com.cinema.booking_app.cinema.entity.CinemaEntity;
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,9 +28,11 @@ public class RoomEntity extends AbstractAuditingEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id")
+    @JsonIgnore
     CinemaEntity cinema;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<RowEntity> rows;
 
     @Column(name = "is_active")
