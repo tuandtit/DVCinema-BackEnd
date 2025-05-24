@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity, Long> {
@@ -22,7 +23,7 @@ public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity
 
     @Query("SELECT s " +
             "FROM SeatShowtimeEntity s " +
-            "WHERE s.status = 'HOLD' AND s.canceledTime < CURRENT_TIMESTAMP")
-    List<SeatShowtimeEntity> findExpiredSeats();
+            "WHERE s.status = 'HOLD' AND s.canceledTime < :now")
+    List<SeatShowtimeEntity> findExpiredSeats(@Param("now") Instant now);
 
 }

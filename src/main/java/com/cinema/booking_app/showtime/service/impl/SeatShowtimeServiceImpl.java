@@ -165,7 +165,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
     @Scheduled(fixedRate = 30000)
     @Transactional
     public void releaseExpiredHeldSeats() {
-        List<SeatShowtimeEntity> expiredSeats = seatShowtimeRepository.findExpiredSeats();
+        List<SeatShowtimeEntity> expiredSeats = seatShowtimeRepository.findExpiredSeats(Instant.now());
         if (expiredSeats.isEmpty()) {
             return;
         }
