@@ -114,7 +114,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             FirebaseAuth.getInstance().verifyIdToken(request.getGoogleToken());
             final var email = request.getEmail();
             final var account = accountRepository.findByUsernameAndAuthProvider(email, AuthProvider.GOOGLE)
-                    .orElseGet(() -> createAccount(email, request.getAvatar()));
+                    .orElseGet(() -> createAccount(email, request.getAvatar(), request.getDisplayName()));
 
             final var authentication = tokenProvider.getAuthentication(account);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -127,8 +127,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             createRefreshTokenCookie(response, jwtRefreshToken);
 
-            return accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
-
+            AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
+            dto.setDisplayName(account.getDisplayName());
+            dto.setUserId(account.getId());
+            return dto;
         } catch (FirebaseAuthException ex) {
             throw new BadCredentialsException(ex.getMessage());
         }
@@ -159,10 +161,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return accountMapper.toDto(jwtAccessToken);
     }
 
-    private AccountEntity createAccount(String email, String avatar) {
+    private AccountEntity createAccount(String email, String avatar, String displayName) {
         final var account = new AccountEntity();
         account.setUsername(email);
         account.setAvatar(avatar);
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setDisplayName(displayName == null ? email.substring(0, email.indexOf("@")) : displayName.trim());
         account.setPasswordHash(passwordEncoder.encode(PASSWORD_DEFAULT));
         account.setAuthProvider(AuthProvider.GOOGLE);
         account.setRoles(List.of(roleRepository.findByName(ERole.USER).orElse(new RoleEntity(ERole.USER))));

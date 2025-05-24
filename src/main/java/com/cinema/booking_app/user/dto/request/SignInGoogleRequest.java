@@ -12,6 +12,6 @@ public class SignInGoogleRequest {
     @Email
     @NotBlank
     private String email;
-
+    private String displayName;
     private String avatar;
 }

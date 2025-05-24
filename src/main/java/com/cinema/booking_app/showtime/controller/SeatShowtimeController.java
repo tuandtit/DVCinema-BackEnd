@@ -22,8 +22,8 @@ public class SeatShowtimeController {
     }
 
     @PostMapping("/release-seats")
-    public Response<Void> releaseSeats(@RequestParam List<Long> seatIds, @RequestParam Long showtimeId) {
-        service.releaseSeatByIds(showtimeId, seatIds);
+    public Response<Void> releaseSeats(@RequestParam List<Long> seatShowtimeIds, @RequestParam Long showtimeId) {
+        service.releaseSeatByIds(seatShowtimeIds, showtimeId);
         return Response.noContent();
     }
 
