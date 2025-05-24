@@ -36,3 +36,5 @@ build/
 # Bỏ qua tất cả các file JSON trong thư mục firebase
 src/main/resources/firebase/*.json
 
+src/main/resources/application.properties
+
