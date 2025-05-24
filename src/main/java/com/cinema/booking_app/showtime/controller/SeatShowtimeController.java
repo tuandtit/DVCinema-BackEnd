@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/seat-by-showtime")
@@ -24,6 +25,12 @@ public class SeatShowtimeController {
     @PostMapping("/release-seats")
     public Response<Void> releaseSeats(@RequestParam List<Long> seatShowtimeIds, @RequestParam Long showtimeId) {
         service.releaseSeatByIds(seatShowtimeIds, showtimeId);
+        return Response.noContent();
+    }
+
+    @PostMapping("/extend-seat-hold-time")
+    public Response<Void> extendSeatHoldTime(@RequestParam Set<Long> seatShowtimeIds, @RequestParam Long showtimeId) {
+        service.extendSeatHoldTime(seatShowtimeIds, showtimeId);
         return Response.noContent();
     }
 

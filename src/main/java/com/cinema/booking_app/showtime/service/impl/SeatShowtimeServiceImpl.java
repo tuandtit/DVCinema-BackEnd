@@ -88,7 +88,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
     public List<BaseDto> extendSeatHoldTime(Set<Long> seatShowtimeIds, Long showtimeId) {
         validateIds(null, null, showtimeId);
         if (seatShowtimeIds == null || seatShowtimeIds.isEmpty()) {
-            throw new BusinessException("400", "SeatShowtime IDs cannot be null or empty");
+            throw new BusinessException("400", "Vui lòng chọn ghế");
         }
 
         // Fetch and update seat hold times in batch
@@ -101,7 +101,6 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         seatShowtimeList.forEach(seat -> seat.setCanceledTime(newCancelTime));
 
         List<SeatShowtimeEntity> saved = seatShowtimeRepository.saveAll(seatShowtimeList);
-        broadcastSeatUpdate(showtimeId, saved);
 
         return saved.stream()
                 .map(s -> BaseDto.builder().id(s.getId()).build())
