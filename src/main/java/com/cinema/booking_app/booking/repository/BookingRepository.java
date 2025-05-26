@@ -8,5 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
-    Optional<BookingEntity> findByBookingCode(String bookingCode);
+    Optional<BookingEntity> findByBookingCode(Long bookingCode);
+
+    void deleteByBookingCode(Long bookingCode);
 }

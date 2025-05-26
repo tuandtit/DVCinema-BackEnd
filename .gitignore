@@ -38,3 +38,5 @@ src/main/resources/firebase/*.json
 
 src/main/resources/application.properties
 
+.env
+

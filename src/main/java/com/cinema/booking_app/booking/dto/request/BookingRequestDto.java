@@ -1,22 +1,28 @@
 package com.cinema.booking_app.booking.dto.request;
 
+import com.cinema.booking_app.common.enums.PaymentStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingRequestDto {
-    @NotNull(message = "Showtime ID is required")
-    private Long showtimeId;
+    private Long id;
+    PaymentStatus paymentStatus;
+    String transactionId;
+    Long showtimeId;
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
-
-    @NotEmpty(message = "Seats cannot be empty")
-    private List<Long> seatIds; // Danh sách ID của ghế
+    @NotEmpty(message = "seatShowtimeIds cannot be empty")
+    private Set<Long> seatShowtimeIds;
 
     @NotNull(message = "Total price is required")
     private BigDecimal totalPrice;

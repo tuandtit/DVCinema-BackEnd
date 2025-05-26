@@ -2,6 +2,7 @@ package com.cinema.booking_app.showtime.repository;
 
 import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,7 @@ public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity
             "WHERE s.status = 'HOLD' AND s.canceledTime < :now")
     List<SeatShowtimeEntity> findExpiredSeats(@Param("now") Instant now);
 
+    @Modifying
+    @Query("UPDATE SeatShowtimeEntity s SET s.status = 'BOOKED' WHERE s.id IN :seatShowtimeIds")
+    void confirmBook(@Param("seatShowtimeIds") List<Long> seatShowtimeIds);
 }

@@ -14,13 +14,8 @@ import org.springframework.web.bind.annotation.*;
 public class BookingController {
     private final BookingService bookingService;
 
-    @PostMapping
-    public Response<BookingResponseDto> createBooking(@Valid @RequestBody BookingRequestDto request) {
-        return Response.ok(bookingService.createBooking(request));
-    }
-
-    @GetMapping("/{bookingCode}")
-    public Response<BookingResponseDto> getBookingByCode(@PathVariable String bookingCode) {
+    @GetMapping
+    public Response<BookingResponseDto> getBookingByCode(@RequestParam Long bookingCode) {
         return Response.ok(bookingService.getBookingByCode(bookingCode));
     }
 }

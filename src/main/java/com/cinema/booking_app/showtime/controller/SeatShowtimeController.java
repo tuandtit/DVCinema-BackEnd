@@ -7,6 +7,7 @@ import com.cinema.booking_app.showtime.service.SeatShowtimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -18,8 +19,13 @@ public class SeatShowtimeController {
     private final SeatShowtimeService service;
 
     @PostMapping("/hold-seat")
-    public Response<BaseDto> holdSeats(@RequestParam Long userId, @RequestParam Long seatId, @RequestParam Long showtimeId) {
-        return Response.ok(service.holdSeat(userId, seatId, showtimeId));
+    public Response<BaseDto> holdSeats(
+            @RequestParam Long userId,
+            @RequestParam Long seatId,
+            @RequestParam Long showtimeId,
+            @RequestParam BigDecimal ticketPrice
+    ) {
+        return Response.ok(service.holdSeat(userId, seatId, showtimeId, ticketPrice));
     }
 
     @PostMapping("/release-seats")

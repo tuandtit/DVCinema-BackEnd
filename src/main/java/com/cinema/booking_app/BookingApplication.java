@@ -4,11 +4,14 @@ import com.cinema.booking_app.config.properties.RsaKeyProperties;
 import io.micrometer.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import vn.payos.PayOS;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,6 +22,20 @@ import java.net.UnknownHostException;
 public class BookingApplication {
 
     private static final Logger log = LoggerFactory.getLogger(BookingApplication.class);
+
+    @Value("${payos.client-id}")
+    public String clientId;
+
+    @Value("${payos.api-key}")
+    public String apiKey;
+
+    @Value("${payos.checksum-key}")
+    public String checksumKey;
+
+    @Bean
+    public PayOS payOS() {
+        return new PayOS(clientId, apiKey, checksumKey);
+    }
 
     public static void main(String[] args) {
         final var app = new SpringApplication(BookingApplication.class);

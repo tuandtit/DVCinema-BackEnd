@@ -8,8 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tbl_seat_showtimes")
@@ -36,9 +36,8 @@ public class SeatShowtimeEntity extends AbstractAuditingEntity<Long> {
     @Enumerated(EnumType.STRING)
     private SeatStatus status = SeatStatus.AVAILABLE; // BOOKED, HOLD, AVAILABLE
 
-    @Column(name = "booked_time")
-    private LocalDateTime bookedTime;
-
     @Column(name = "canceled_time")
     private Instant canceledTime;
+
+    private BigDecimal ticketPrice;
 }

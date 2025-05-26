@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
 
     @Override
     @Transactional
-    public BaseDto holdSeat(Long userId, Long seatId, Long showtimeId) {
+    public BaseDto holdSeat(Long userId, Long seatId, Long showtimeId, BigDecimal ticketPrice) {
         validateIds(userId, seatId, showtimeId);
 
         // Check max seats constraint
@@ -65,6 +66,10 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         SeatEntity seat = getSeat(seatId);
         ShowtimeEntity showtime = getShowtime(showtimeId);
 
+        if (ticketPrice == null || ticketPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("400", "Ticket price must be greater than or equal to zero");
+        }
+
         // Create and save seat hold
         SeatShowtimeEntity entity = SeatShowtimeEntity.builder()
                 .user(account)
@@ -72,6 +77,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
                 .seat(seat)
                 .status(SeatStatus.HOLD)
                 .canceledTime(Instant.now().plus(10, ChronoUnit.MINUTES))
+                .ticketPrice(ticketPrice)
                 .build();
 
         try {

@@ -34,9 +34,9 @@ public class QRCodeService {
         }
     }
 
-    public String generateAndUploadQRCode(String bookingCode) throws IOException {
+    public String generateAndUploadQRCode(Long bookingCode) throws IOException {
         // 1. Sinh QR Code
-        byte[] qrBytes = generateQRCodeImage(bookingCode, 300, 300);
+        byte[] qrBytes = generateQRCodeImage(bookingCode.toString(), 300, 300);
 
         // 2. Convert byte[] -> MultipartFile
         MultipartFile multipartFile = new MockMultipartFile(
