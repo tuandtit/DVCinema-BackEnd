@@ -7,7 +7,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -20,6 +19,7 @@ public class BookingRequestDto {
     PaymentStatus paymentStatus;
     String transactionId;
     Long showtimeId;
+    Long accountId;
 
     @NotEmpty(message = "seatShowtimeIds cannot be empty")
     private Set<Long> seatShowtimeIds;

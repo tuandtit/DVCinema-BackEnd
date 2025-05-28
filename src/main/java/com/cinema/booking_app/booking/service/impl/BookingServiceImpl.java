@@ -3,10 +3,8 @@ package com.cinema.booking_app.booking.service.impl;
 import com.cinema.booking_app.booking.dto.request.BookingRequestDto;
 import com.cinema.booking_app.booking.dto.response.BookingResponseDto;
 import com.cinema.booking_app.booking.entity.BookingEntity;
-import com.cinema.booking_app.booking.entity.BookingSeatShowtimeEntity;
 import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
-import com.cinema.booking_app.booking.repository.BookingSeatShowtimeRepository;
 import com.cinema.booking_app.booking.service.BookingService;
 import com.cinema.booking_app.common.base.service.impl.MailService;
 import com.cinema.booking_app.common.base.service.impl.QRCodeService;
@@ -16,6 +14,8 @@ import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import com.cinema.booking_app.showtime.entity.ShowtimeEntity;
 import com.cinema.booking_app.showtime.repository.SeatShowtimeRepository;
 import com.cinema.booking_app.showtime.repository.ShowtimeRepository;
+import com.cinema.booking_app.user.entity.AccountEntity;
+import com.cinema.booking_app.user.repository.AccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -38,11 +37,11 @@ public class BookingServiceImpl implements BookingService {
 
     BookingRepository bookingRepository;
     SeatShowtimeRepository seatShowtimeRepository;
-    BookingSeatShowtimeRepository bookingSeatShowtimeRepository;
     BookingMapper bookingMapper;
     QRCodeService qrCodeService;
     MailService mailService;
     ShowtimeRepository showtimeRepository;
+    AccountRepository accountRepository;
 
     @Override
     @Transactional
@@ -54,7 +53,8 @@ public class BookingServiceImpl implements BookingService {
             booking = bookingRepository.save(BookingEntity.builder()
                     .bookingUrl(qrCodeService.generateAndUploadQRCode(bookingCode))
                     .bookingCode(bookingCode)
-                    .showtimeId(request.getShowtimeId())
+                    .showtimeId(getShowtime(request.getShowtimeId()).getId())
+                    .accountId(getAccount(request.getAccountId()).getId())
                     .totalPrice(request.getTotalPrice())
                     .paymentStatus(PaymentStatus.PENDING)
                     .isUsed(false)
@@ -62,17 +62,8 @@ public class BookingServiceImpl implements BookingService {
         } catch (IOException e) {
             throw new BusinessException("400", "Có lỗi khi tạo mã qr và upload");
         }
-        List<BookingSeatShowtimeEntity> entities = new ArrayList<>();
-        for (var id : request.getSeatShowtimeIds()) {
-            SeatShowtimeEntity seatShowtime = getSeatShowtime(id);
-            entities.add(BookingSeatShowtimeEntity.builder()
-                    .bookingCode(booking.getBookingCode())
-                    .seatShowtimeId(seatShowtime.getId())
-                    .build());
-        }
 
-        bookingSeatShowtimeRepository.saveAll(entities);
-
+        seatShowtimeRepository.setBookingCode(bookingCode, request.getSeatShowtimeIds());
 
         // Ánh xạ sang DTO
         return bookingMapper.toDto(booking);
@@ -80,17 +71,16 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingResponseDto confirmPayment(Long bookingCode) {
+    public void confirmPayment(Long bookingCode) {
         BookingEntity booking = getBooking(bookingCode);
         if (booking.getPaymentStatus() == PaymentStatus.SUCCESS) {
-            return bookingMapper.toDto(booking);
+            return;
         }
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
         booking.setBookingTime(LocalDateTime.now());
         mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
-        List<Long> seatShowtimeIds = bookingSeatShowtimeRepository.findAllSeatShowtimeIdsByBookingCode(bookingCode);
-        seatShowtimeRepository.confirmBook(seatShowtimeIds);
-        return bookingMapper.toDto(bookingRepository.save(booking));
+        seatShowtimeRepository.confirmBook(bookingCode);
+        bookingRepository.save(booking);
     }
 
     @Override
@@ -98,14 +88,22 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.deleteByBookingCode(bookingCode);
     }
 
+    @Transactional
     @Override
-    public BookingResponseDto getBookingByCode(Long bookingCode) {
+    public BookingResponseDto confirmAndGetBookingByCode(Long bookingCode) {
         BookingEntity booking = getBooking(bookingCode);
+        if (booking.getPaymentStatus() != PaymentStatus.SUCCESS) {
+            booking.setPaymentStatus(PaymentStatus.SUCCESS);
+            booking.setBookingTime(LocalDateTime.now());
+            mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
+            seatShowtimeRepository.confirmBook(bookingCode);
+            bookingRepository.save(booking);
+        }
+
         BookingResponseDto dto = bookingMapper.toDto(booking);
         ShowtimeEntity showtime = showtimeRepository.findById(booking.getShowtimeId())
                 .orElseThrow(() -> new BusinessException("404", "Showtime not found with id: " + booking.getShowtimeId()));
-        List<Long> allSeatShowtimeIdsByBookingCode = bookingSeatShowtimeRepository.findAllSeatShowtimeIdsByBookingCode(bookingCode);
-        List<SeatShowtimeEntity> seatShowtimeEntities = seatShowtimeRepository.findAllById(allSeatShowtimeIdsByBookingCode);
+        List<SeatShowtimeEntity> seatShowtimeEntities = seatShowtimeRepository.findByBooking_BookingCode(bookingCode);
         String seatName = String.join(",",
                 seatShowtimeEntities.stream()
                         .map(entity -> entity.getSeat().getRow().getLabel() + entity.getSeat().getSeatNumber())
@@ -151,11 +149,21 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BusinessException("404", "Booking not found with bookingCode: " + bookingCode));
     }
 
-    private SeatShowtimeEntity getSeatShowtime(Long id) {
+    private ShowtimeEntity getShowtime(Long id) {
         if (id == null) {
             throw new BusinessException("404", "id must be not null");
         }
-        return seatShowtimeRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("404", "SeatShowtime not found with id: " + id));
+        return showtimeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("404", "Showtime not found with id: " + id));
+
+    }
+
+    private AccountEntity getAccount(Long id) {
+        if (id == null) {
+            throw new BusinessException("404", "id must be not null");
+        }
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("404", "Account not found with id: " + id));
+
     }
 }

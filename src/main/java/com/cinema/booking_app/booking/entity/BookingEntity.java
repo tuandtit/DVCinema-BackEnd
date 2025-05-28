@@ -2,14 +2,15 @@ package com.cinema.booking_app.booking.entity;
 
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import com.cinema.booking_app.common.enums.PaymentStatus;
+import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_bookings")
@@ -25,9 +26,11 @@ public class BookingEntity extends AbstractAuditingEntity<Long> {
     BigDecimal totalPrice;
     LocalDateTime bookingTime;
     Long showtimeId;
+    Long accountId;
     @Enumerated(EnumType.STRING)
     PaymentStatus paymentStatus;
-    String transactionId;
     String bookingUrl;
     boolean isUsed = false;
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SeatShowtimeEntity> seatShowtimeEntities = new ArrayList<>();
 }

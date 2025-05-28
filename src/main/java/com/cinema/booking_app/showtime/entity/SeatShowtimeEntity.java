@@ -1,5 +1,6 @@
 package com.cinema.booking_app.showtime.entity;
 
+import com.cinema.booking_app.booking.entity.BookingEntity;
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import com.cinema.booking_app.common.enums.SeatStatus;
 import com.cinema.booking_app.room.entity.SeatEntity;
@@ -38,6 +39,10 @@ public class SeatShowtimeEntity extends AbstractAuditingEntity<Long> {
 
     @Column(name = "canceled_time")
     private Instant canceledTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_code", referencedColumnName = "booking_code")
+    private BookingEntity booking;
 
     private BigDecimal ticketPrice;
 }

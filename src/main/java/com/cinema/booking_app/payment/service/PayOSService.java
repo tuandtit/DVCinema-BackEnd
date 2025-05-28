@@ -33,6 +33,7 @@ public class PayOSService {
             final String returnUrl = payOSConfig.returnUrl;
             final String cancelUrl = payOSConfig.cancelUrl;
             BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
+                    .accountId(requestBody.getAccountId())
                     .showtimeId(requestBody.getShowtimeId())
                     .seatShowtimeIds(requestBody.getSeatShowtimeIds())
                     .totalPrice(BigDecimal.valueOf(requestBody.getPrice()))

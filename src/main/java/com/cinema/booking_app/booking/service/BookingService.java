@@ -8,9 +8,10 @@ public interface BookingService {
     BookingResponseDto createBooking(BookingRequestDto request);
 
     @Transactional
-    BookingResponseDto confirmPayment(Long id);
+    void confirmPayment(Long id);
 
     void deleteBooking(Long id);
 
-    BookingResponseDto getBookingByCode(Long bookingCode);
+    @Transactional
+    BookingResponseDto confirmAndGetBookingByCode(Long bookingCode);
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity, Long> {
 
@@ -28,6 +29,12 @@ public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity
     List<SeatShowtimeEntity> findExpiredSeats(@Param("now") Instant now);
 
     @Modifying
-    @Query("UPDATE SeatShowtimeEntity s SET s.status = 'BOOKED' WHERE s.id IN :seatShowtimeIds")
-    void confirmBook(@Param("seatShowtimeIds") List<Long> seatShowtimeIds);
+    @Query("UPDATE SeatShowtimeEntity s SET s.status = 'BOOKED' WHERE s.booking.bookingCode = :bookingCode")
+    void confirmBook(@Param("bookingCode") Long bookingCode);
+
+    @Modifying
+    @Query("UPDATE SeatShowtimeEntity s SET s.booking.bookingCode = :bookingCode WHERE s.id IN :seatShowtimeIds")
+    void setBookingCode(@Param("bookingCode") Long bookingCode, @Param("seatShowtimeIds") Set<Long> seatShowtimeIds);
+
+    List<SeatShowtimeEntity> findByBooking_BookingCode(@Param("bookingCode") Long bookingCode);
 }

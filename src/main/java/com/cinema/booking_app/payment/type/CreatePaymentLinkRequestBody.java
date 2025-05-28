@@ -15,6 +15,7 @@ public class CreatePaymentLinkRequestBody {
     private String returnUrl;
     private int price;
     private Long showtimeId;
+    private Long accountId;
     private Set<Long> seatShowtimeIds;
     private String cancelUrl;
 }
