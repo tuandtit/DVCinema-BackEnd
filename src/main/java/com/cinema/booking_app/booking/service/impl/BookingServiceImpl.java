@@ -7,7 +7,6 @@ import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
 import com.cinema.booking_app.booking.service.BookingService;
 import com.cinema.booking_app.common.base.service.impl.MailService;
-import com.cinema.booking_app.common.base.service.impl.QRCodeService;
 import com.cinema.booking_app.common.enums.PaymentStatus;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
@@ -21,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,8 +36,8 @@ public class BookingServiceImpl implements BookingService {
     BookingRepository bookingRepository;
     SeatShowtimeRepository seatShowtimeRepository;
     BookingMapper bookingMapper;
-    QRCodeService qrCodeService;
     MailService mailService;
+    AsyncQrService asyncQrService;
     ShowtimeRepository showtimeRepository;
     AccountRepository accountRepository;
 
@@ -49,19 +47,16 @@ public class BookingServiceImpl implements BookingService {
         // Tạo booking
         Long bookingCode = generateBookingCode();
         BookingEntity booking;
-        try {
-            booking = bookingRepository.save(BookingEntity.builder()
-                    .bookingUrl(qrCodeService.generateAndUploadQRCode(bookingCode))
-                    .bookingCode(bookingCode)
-                    .showtimeId(getShowtime(request.getShowtimeId()).getId())
-                    .accountId(getAccount(request.getAccountId()).getId())
-                    .totalPrice(request.getTotalPrice())
-                    .paymentStatus(PaymentStatus.PENDING)
-                    .isUsed(false)
-                    .build());
-        } catch (IOException e) {
-            throw new BusinessException("400", "Có lỗi khi tạo mã qr và upload");
-        }
+        booking = bookingRepository.save(BookingEntity.builder()
+                .bookingCode(bookingCode)
+                .showtimeId(getShowtime(request.getShowtimeId()).getId())
+                .accountId(getAccount(request.getAccountId()).getId())
+                .totalPrice(request.getTotalPrice())
+                .paymentStatus(PaymentStatus.PENDING)
+                .isUsed(false)
+                .build());
+
+        asyncQrService.generateAndUploadQRCodeAsync(bookingCode);
 
         seatShowtimeRepository.setBookingCode(bookingCode, request.getSeatShowtimeIds());
 
@@ -78,13 +73,14 @@ public class BookingServiceImpl implements BookingService {
         }
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
         booking.setBookingTime(LocalDateTime.now());
-        mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
         seatShowtimeRepository.confirmBook(bookingCode);
         bookingRepository.save(booking);
     }
 
     @Override
+    @Transactional
     public void deleteBooking(Long bookingCode) {
+        seatShowtimeRepository.deleteAllByBooking_BookingCode(bookingCode);
         bookingRepository.deleteByBookingCode(bookingCode);
     }
 
@@ -95,11 +91,11 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getPaymentStatus() != PaymentStatus.SUCCESS) {
             booking.setPaymentStatus(PaymentStatus.SUCCESS);
             booking.setBookingTime(LocalDateTime.now());
-            mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
             seatShowtimeRepository.confirmBook(bookingCode);
             bookingRepository.save(booking);
         }
 
+        mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
         BookingResponseDto dto = bookingMapper.toDto(booking);
         ShowtimeEntity showtime = showtimeRepository.findById(booking.getShowtimeId())
                 .orElseThrow(() -> new BusinessException("404", "Showtime not found with id: " + booking.getShowtimeId()));
@@ -166,4 +162,4 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BusinessException("404", "Account not found with id: " + id));
 
     }
-}
+    }

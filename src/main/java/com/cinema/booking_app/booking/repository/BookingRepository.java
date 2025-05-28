@@ -2,6 +2,9 @@ package com.cinema.booking_app.booking.repository;
 
 import com.cinema.booking_app.booking.entity.BookingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -11,4 +14,9 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     Optional<BookingEntity> findByBookingCode(Long bookingCode);
 
     void deleteByBookingCode(Long bookingCode);
+
+    @Modifying
+    @Query("UPDATE BookingEntity b SET b.bookingUrl = :url WHERE b.bookingCode = :code")
+    void updateBookingUrl(@Param("code") Long bookingCode, @Param("url") String url);
+
 }

@@ -37,4 +37,6 @@ public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity
     void setBookingCode(@Param("bookingCode") Long bookingCode, @Param("seatShowtimeIds") Set<Long> seatShowtimeIds);
 
     List<SeatShowtimeEntity> findByBooking_BookingCode(@Param("bookingCode") Long bookingCode);
+
+    void deleteAllByBooking_BookingCode(Long bookingBookingCode);
 }

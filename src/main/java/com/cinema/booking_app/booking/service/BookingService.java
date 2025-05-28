@@ -10,7 +10,8 @@ public interface BookingService {
     @Transactional
     void confirmPayment(Long id);
 
-    void deleteBooking(Long id);
+    @Transactional
+    void deleteBooking(Long bookingCode);
 
     @Transactional
     BookingResponseDto confirmAndGetBookingByCode(Long bookingCode);

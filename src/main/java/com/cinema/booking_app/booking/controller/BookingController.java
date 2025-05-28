@@ -16,4 +16,10 @@ public class BookingController {
     public Response<BookingResponseDto> confirmAndGetBookingByCode(@RequestParam Long bookingCode) {
         return Response.ok(bookingService.confirmAndGetBookingByCode(bookingCode));
     }
+
+    @DeleteMapping
+    public Response<Void> delete(@RequestParam Long bookingCode) {
+        bookingService.deleteBooking(bookingCode);
+        return Response.noContent();
+    }
 }
