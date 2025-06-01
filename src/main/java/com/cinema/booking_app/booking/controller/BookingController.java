@@ -1,10 +1,13 @@
 package com.cinema.booking_app.booking.controller;
 
 import com.cinema.booking_app.booking.dto.response.BookingResponseDto;
+import com.cinema.booking_app.booking.dto.response.TicketDto;
 import com.cinema.booking_app.booking.service.BookingService;
 import com.cinema.booking_app.common.base.dto.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -21,5 +24,10 @@ public class BookingController {
     public Response<Void> delete(@RequestParam Long bookingCode) {
         bookingService.deleteBooking(bookingCode);
         return Response.noContent();
+    }
+
+    @GetMapping("/checkin")
+    public Response<List<TicketDto>> checkin(@RequestParam Long bookingCode) {
+        return Response.ok(bookingService.checkin(bookingCode));
     }
 }

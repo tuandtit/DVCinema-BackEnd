@@ -20,7 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE tbl_rooms SET is_active = false WHERE id = ?")
 public class RoomEntity extends AbstractAuditingEntity<Long> {
 
     @Column(nullable = false)

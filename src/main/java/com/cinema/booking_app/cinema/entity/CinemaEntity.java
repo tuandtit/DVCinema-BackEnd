@@ -31,4 +31,6 @@ public class CinemaEntity extends AbstractAuditingEntity<Long> {
 
     @OneToMany(mappedBy = "cinema", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomEntity> rooms;
+
+    private String address;
 }

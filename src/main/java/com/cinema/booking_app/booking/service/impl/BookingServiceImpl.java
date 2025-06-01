@@ -2,6 +2,7 @@ package com.cinema.booking_app.booking.service.impl;
 
 import com.cinema.booking_app.booking.dto.request.BookingRequestDto;
 import com.cinema.booking_app.booking.dto.response.BookingResponseDto;
+import com.cinema.booking_app.booking.dto.response.TicketDto;
 import com.cinema.booking_app.booking.entity.BookingEntity;
 import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -105,12 +107,40 @@ public class BookingServiceImpl implements BookingService {
                         .map(entity -> entity.getSeat().getRow().getLabel() + entity.getSeat().getSeatNumber())
                         .toList());
         dto.setCinemaName(showtime.getRoom().getCinema().getName());
+        dto.setAddress(showtime.getRoom().getCinema().getAddress());
         dto.setMovieTitle(showtime.getMovie().getTitle());
         dto.setSeatName(seatName);
         dto.setRoomName(showtime.getRoom().getName());
         dto.setShowtime(getShowDateTimeFormatted(showtime.getShowDate(), showtime.getStartTime()));
 
         return dto;
+    }
+
+    @Override
+    public List<TicketDto> checkin(Long bookingCode) {
+        BookingEntity booking = getBooking(bookingCode);
+        if (booking.isUsed())
+            throw new BusinessException("400", "Booking has been used");
+        booking.setUsed(true);
+        bookingRepository.save(booking);
+        List<TicketDto> dtos = new ArrayList<>();
+        List<SeatShowtimeEntity> seatShowtimeEntities = seatShowtimeRepository.findByBooking_BookingCode(bookingCode);
+        for (var entity : seatShowtimeEntities) {
+            var showtime = entity.getShowtime();
+            TicketDto dto = TicketDto.builder()
+                    .cinemaName(showtime.getRoom().getCinema().getName())
+                    .showtime(showtime.getMovie().getTitle())
+                    .seatName(entity.getSeat().getRow().getLabel() + entity.getSeat().getSeatNumber())
+                    .roomName(showtime.getRoom().getName())
+                    .showtime(getShowDateTimeFormatted(showtime.getShowDate(), showtime.getStartTime()))
+                    .movieTitle(showtime.getMovie().getTitle())
+                    .price(entity.getTicketPrice())
+                    .address(showtime.getRoom().getCinema().getAddress())
+                    .build();
+            dtos.add(dto);
+        }
+
+        return !dtos.isEmpty() ? dtos : List.of(TicketDto.builder().build());
     }
 
     private String getShowDateTimeFormatted(LocalDate showDate, LocalTime startTime) {
@@ -162,4 +192,4 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BusinessException("404", "Account not found with id: " + id));
 
     }
-    }
+}
