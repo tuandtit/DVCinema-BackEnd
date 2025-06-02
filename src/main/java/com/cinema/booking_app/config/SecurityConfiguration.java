@@ -5,7 +5,6 @@ import com.cinema.booking_app.config.filter.JwtRefreshTokenFilter;
 import com.cinema.booking_app.config.properties.RsaKeyProperties;
 import com.cinema.booking_app.user.security.jwt.TokenProvider;
 import com.cinema.booking_app.user.service.impl.LogoutServiceImpl;
-import com.cinema.booking_app.user.service.impl.TokenBlacklistService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -56,11 +55,12 @@ public class SecurityConfiguration {
     public SecurityFilterChain signInSecurityFilterChain(HttpSecurity http) throws Exception {
         return http.securityMatcher(
                         new OrRequestMatcher(
-                                new AntPathRequestMatcher("/sign-in/**", RequestMethod.POST.name()),
-                                new AntPathRequestMatcher("/sign-up/**", RequestMethod.POST.name()),
-                                new AntPathRequestMatcher("/google/sign-in/**", RequestMethod.POST.name())
+                                new AntPathRequestMatcher("/sign-in/**"),
+                                new AntPathRequestMatcher("/sign-up/**"),
+                                new AntPathRequestMatcher("/google/sign-in/**")
                         )
                 )
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -69,14 +69,23 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity, TokenProvider tokenProvider, TokenBlacklistService tokenBlacklistService) throws Exception {
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity, TokenProvider tokenProvider) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/api-catch/**"))
+                .securityMatcher(new AntPathRequestMatcher("/api/**"))
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/movies/**").permitAll()
+                        .requestMatchers("/api/showtimes/**").permitAll()
+                        .requestMatchers("/api/cinemas/**").permitAll()
+                        .requestMatchers("/api/cities/**").permitAll()
+                        .requestMatchers("/api/genres/**").permitAll()
+                        .requestMatchers("/api/contributors/**").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAccessTokenFilter(tokenProvider, tokenBlacklistService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAccessTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
                     ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
@@ -90,6 +99,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity, TokenProvider tokenProvider) throws Exception {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/refresh-token/**"))
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
@@ -105,14 +115,15 @@ public class SecurityConfiguration {
 
     @Order(4)
     @Bean
-    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity, LogoutServiceImpl logoutService, TokenProvider tokenProvider, TokenBlacklistService tokenBlacklistService) throws Exception {
+    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity, LogoutServiceImpl logoutService, TokenProvider tokenProvider) throws Exception {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/logout/**"))
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAccessTokenFilter(tokenProvider, tokenBlacklistService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAccessTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .addLogoutHandler(logoutService)

@@ -1,14 +1,15 @@
 package com.cinema.booking_app.config.filter;
 
 import com.cinema.booking_app.user.security.jwt.TokenProvider;
-import com.cinema.booking_app.user.service.impl.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -16,15 +17,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JwtAccessTokenFilter extends OncePerRequestFilter {
 
     final TokenProvider tokenProvider;
-    final TokenBlacklistService tokenBlacklistService;
 
     @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
+    protected void doFilterInternal(@NonNull final HttpServletRequest request, @NonNull final HttpServletResponse response, @NonNull final FilterChain filterChain)
             throws ServletException, IOException {
 
         final String token = tokenProvider.resolveToken(request);
@@ -35,17 +36,11 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Nếu token nằm trong blacklist -> trả về 401
-        if (tokenBlacklistService.isBlacklisted(token)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Access token is blacklisted.");
-            return;
-        }
-
         // Nếu token hợp lệ -> thiết lập Authentication
         if (tokenProvider.validateToken(token)) {
             Authentication authentication = tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("[JwtAccessTokenFilter:doFilterInternal] Authentication set to SecurityContextHolder : {}", authentication.getName());
         }
 
         filterChain.doFilter(request, response);

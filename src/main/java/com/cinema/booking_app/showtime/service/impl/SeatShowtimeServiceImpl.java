@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,6 +128,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
 
     @Override
     public List<SeatsDto> getAllByShowtimeId(Long showtimeId) {
+        log.info("User dang chon ghe la: " + SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         validateIds(null, null, showtimeId);
         ShowtimeEntity showtime = getShowtime(showtimeId);
 

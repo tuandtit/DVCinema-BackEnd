@@ -22,7 +22,6 @@ public class LogoutServiceImpl implements LogoutHandler {
 
     RefreshTokenRepository refreshTokenRepository;
     TokenProvider tokenProvider;
-    TokenBlacklistService tokenBlacklistService;
 
     @Override
     public void logout(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) {
@@ -32,8 +31,6 @@ public class LogoutServiceImpl implements LogoutHandler {
         if (ObjectUtils.isEmpty(accessToken) || ObjectUtils.isEmpty(refreshToken)) {
             return;
         }
-
-        tokenBlacklistService.blacklistAccessToken(accessToken);
 
         refreshTokenRepository.findByRefreshToken(refreshToken)
                 .ifPresent(entity -> {

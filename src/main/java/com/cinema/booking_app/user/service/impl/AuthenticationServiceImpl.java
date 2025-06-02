@@ -96,16 +96,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (account.getStatus().equals(AccountStatus.INACTIVE)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, translator.toLocale("error.account.locked"));
         }
-        updateRevokedRefreshToken(account);
-
-        //Let's save the refreshToken as well
-        saveRefreshToken(account, jwtRefreshToken);
-        //Creating the cookie
-        createRefreshTokenCookie(response, jwtRefreshToken);
-        AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
-        dto.setDisplayName(account.getDisplayName());
-        dto.setUserId(account.getId());
-        return dto;
+        return getAccountDto(response, account, jwtAccessToken, jwtRefreshToken);
     }
 
     @Override
@@ -121,19 +112,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             final var jwtAccessToken = tokenProvider.createToken(authentication);
             final var jwtRefreshToken = tokenProvider.createRefreshToken(authentication);
 
-            updateRevokedRefreshToken(account);
-
-            saveRefreshToken(account, jwtRefreshToken);
-
-            createRefreshTokenCookie(response, jwtRefreshToken);
-
-            AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
-            dto.setDisplayName(account.getDisplayName());
-            dto.setUserId(account.getId());
-            return dto;
+            return getAccountDto(response, account, jwtAccessToken, jwtRefreshToken);
         } catch (FirebaseAuthException ex) {
             throw new BadCredentialsException(ex.getMessage());
         }
+    }
+
+    private AccountDto getAccountDto(HttpServletResponse response, AccountEntity account, Jwt jwtAccessToken, Jwt jwtRefreshToken) {
+        updateRevokedRefreshToken(account);
+
+        saveRefreshToken(account, jwtRefreshToken);
+
+        createRefreshTokenCookie(response, jwtRefreshToken);
+
+        AccountDto dto = accountMapper.toDto(jwtAccessToken, jwtRefreshToken);
+        dto.setAvatar(account.getAvatar());
+        dto.setDisplayName(account.getDisplayName());
+        dto.setUserId(account.getId());
+        return dto;
     }
 
     @Override

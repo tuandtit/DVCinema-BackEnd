@@ -19,6 +19,7 @@ import com.cinema.booking_app.user.repository.AccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -97,7 +98,8 @@ public class BookingServiceImpl implements BookingService {
             bookingRepository.save(booking);
         }
 
-        mailService.sendTicketEmail("duongtuan10122003@gmail.com", booking.getBookingUrl());
+        var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        mailService.sendTicketEmail(username, booking.getBookingUrl());
         BookingResponseDto dto = bookingMapper.toDto(booking);
         ShowtimeEntity showtime = showtimeRepository.findById(booking.getShowtimeId())
                 .orElseThrow(() -> new BusinessException("404", "Showtime not found with id: " + booking.getShowtimeId()));

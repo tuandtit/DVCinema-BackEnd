@@ -108,7 +108,7 @@ public class TokenProvider {
     }
 
     private boolean getIfTokenIsExpired(Jwt jwtToken) {
-        return Objects.requireNonNull(jwtToken.getExpiresAt()).isBefore(Instant.now());
+        return !Objects.requireNonNull(jwtToken.getExpiresAt()).isBefore(Instant.now());
     }
 
     public long getRemainingTTL(String token) {
@@ -140,7 +140,7 @@ public class TokenProvider {
             return new UsernamePasswordAuthenticationToken(principal, token, authorities);
         } catch (JwtException e) {
             log.error("[TokenProvider:getAuthentication] Failed to decode token: {}", e.getMessage());
-            throw new RuntimeException(INVALID_JWT_TOKEN);
+            throw new BusinessException(INVALID_JWT_TOKEN);
         }
     }
 
