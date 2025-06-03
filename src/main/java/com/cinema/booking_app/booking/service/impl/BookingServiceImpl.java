@@ -19,6 +19,7 @@ import com.cinema.booking_app.user.repository.AccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
@@ -99,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("mail gui den: {}", username);
         mailService.sendTicketEmail(username, booking.getBookingUrl());
         BookingResponseDto dto = bookingMapper.toDto(booking);
         ShowtimeEntity showtime = showtimeRepository.findById(booking.getShowtimeId())

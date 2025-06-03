@@ -3,11 +3,9 @@ package com.cinema.booking_app.payment.controller;
 import com.cinema.booking_app.payment.service.PayOSService;
 import com.cinema.booking_app.payment.type.CreatePaymentLinkRequestBody;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import vn.payos.type.PaymentLinkData;
 
 import java.util.Map;
 

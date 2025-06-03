@@ -36,7 +36,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -52,12 +51,21 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain signInSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http.securityMatcher(
+    public SecurityFilterChain publicApiSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(
                         new OrRequestMatcher(
                                 new AntPathRequestMatcher("/sign-in/**"),
                                 new AntPathRequestMatcher("/sign-up/**"),
-                                new AntPathRequestMatcher("/google/sign-in/**")
+                                new AntPathRequestMatcher("/google/sign-in/**"),
+                                new AntPathRequestMatcher("/api/movies/**"),
+                                new AntPathRequestMatcher("/api/showtimes/**"),
+                                new AntPathRequestMatcher("/api/cinemas/**"),
+                                new AntPathRequestMatcher("/api/cities/**"),
+                                new AntPathRequestMatcher("/api/genres/**"),
+                                new AntPathRequestMatcher("/api/contributors/**"),
+                                new AntPathRequestMatcher("/api/payment/**"),
+                                new AntPathRequestMatcher("/api/users/**")
                         )
                 )
                 .cors(withDefaults())
@@ -67,6 +75,7 @@ public class SecurityConfiguration {
                 .build();
     }
 
+
     @Bean
     @Order(2)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity, TokenProvider tokenProvider) throws Exception {
@@ -74,15 +83,7 @@ public class SecurityConfiguration {
                 .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/movies/**").permitAll()
-                        .requestMatchers("/api/showtimes/**").permitAll()
-                        .requestMatchers("/api/cinemas/**").permitAll()
-                        .requestMatchers("/api/cities/**").permitAll()
-                        .requestMatchers("/api/genres/**").permitAll()
-                        .requestMatchers("/api/contributors/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAccessTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)

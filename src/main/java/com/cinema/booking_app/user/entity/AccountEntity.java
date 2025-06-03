@@ -1,13 +1,11 @@
 package com.cinema.booking_app.user.entity;
 
+import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import com.cinema.booking_app.common.enums.AccountStatus;
 import com.cinema.booking_app.common.enums.AuthProvider;
-import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -49,12 +47,10 @@ public class AccountEntity extends AbstractAuditingEntity<Long> {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status")
     private AccountStatus status;
 
     @Column(name = "auth_provider")
-//    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     AuthProvider authProvider = AuthProvider.EMAIL_AND_PASSWORD;
 
