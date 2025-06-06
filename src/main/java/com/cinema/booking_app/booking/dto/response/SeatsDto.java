@@ -1,4 +1,4 @@
-package com.cinema.booking_app.showtime.dto.response;
+package com.cinema.booking_app.booking.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

@@ -1,6 +1,7 @@
 package com.cinema.booking_app.booking.service;
 
 import com.cinema.booking_app.booking.dto.request.BookingRequestDto;
+import com.cinema.booking_app.booking.dto.response.BookingHistoryDto;
 import com.cinema.booking_app.booking.dto.response.BookingResponseDto;
 import com.cinema.booking_app.booking.dto.response.TicketDto;
 import jakarta.transaction.Transactional;
@@ -20,4 +21,6 @@ public interface BookingService {
     BookingResponseDto confirmAndGetBookingByCode(Long bookingCode);
 
     List<TicketDto> checkin(Long bookingCode);
+
+    List<BookingHistoryDto> getHistoryBooking(Long userId);
 }

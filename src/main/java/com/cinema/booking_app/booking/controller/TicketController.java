@@ -1,9 +1,9 @@
-package com.cinema.booking_app.showtime.controller;
+package com.cinema.booking_app.booking.controller;
 
 import com.cinema.booking_app.common.base.dto.response.BaseDto;
 import com.cinema.booking_app.common.base.dto.response.Response;
-import com.cinema.booking_app.showtime.dto.response.SeatsDto;
-import com.cinema.booking_app.showtime.service.SeatShowtimeService;
+import com.cinema.booking_app.booking.dto.response.SeatsDto;
+import com.cinema.booking_app.booking.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/seat-by-showtime")
+@RequestMapping("/api/tickets")
 @RequiredArgsConstructor
-public class SeatShowtimeController {
+public class TicketController {
 
-    private final SeatShowtimeService service;
+    private final TicketService service;
 
     @PostMapping("/hold-seat")
     public Response<BaseDto> holdSeats(

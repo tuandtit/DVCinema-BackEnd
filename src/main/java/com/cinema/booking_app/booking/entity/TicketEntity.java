@@ -1,9 +1,9 @@
-package com.cinema.booking_app.showtime.entity;
+package com.cinema.booking_app.booking.entity;
 
-import com.cinema.booking_app.booking.entity.BookingEntity;
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import com.cinema.booking_app.common.enums.SeatStatus;
 import com.cinema.booking_app.room.entity.SeatEntity;
+import com.cinema.booking_app.showtime.entity.ShowtimeEntity;
 import com.cinema.booking_app.user.entity.AccountEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,14 +13,14 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "tbl_seat_showtimes")
+@Table(name = "tickets")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SeatShowtimeEntity extends AbstractAuditingEntity<Long> {
+public class TicketEntity extends AbstractAuditingEntity<Long> {
     @ManyToOne(optional = false)
     @JoinColumn(name = "seat_id")
     private SeatEntity seat;

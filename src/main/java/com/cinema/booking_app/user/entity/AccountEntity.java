@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Builder
 @Table(
-        name = "tbl_accounts",
+        name = "accounts",
         indexes = {
                 @Index(
                         columnList = "username",
@@ -56,7 +56,7 @@ public class AccountEntity extends AbstractAuditingEntity<Long> {
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinTable(
-            name = "tbl_account_roles",
+            name = "account_roles",
             joinColumns = @JoinColumn(name = "account_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )

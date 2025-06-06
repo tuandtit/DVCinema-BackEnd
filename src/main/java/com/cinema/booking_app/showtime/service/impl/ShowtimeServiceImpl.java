@@ -9,13 +9,18 @@ import com.cinema.booking_app.showtime.dto.request.ShowtimeRequestDto;
 import com.cinema.booking_app.showtime.dto.response.ShowtimeResponseDto;
 import com.cinema.booking_app.showtime.entity.ShowtimeEntity;
 import com.cinema.booking_app.showtime.repository.ShowtimeRepository;
+import com.cinema.booking_app.showtime.repository.TicketPriceRuleRepository;
 import com.cinema.booking_app.showtime.service.ShowtimeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -28,13 +33,24 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     ShowtimeRepository showtimeRepository;
     MovieRepository movieRepository;
     RoomRepository roomRepository;
+    TicketPriceRuleRepository ticketPriceRuleRepository;
 
     @Override
     public ShowtimeResponseDto create(ShowtimeRequestDto dto) {
         MovieEntity movie = movieRepository.findById(dto.getMovieId()).orElseThrow(() -> new BusinessException("404", "Không tìm thấy phim với id " + dto.getMovieId()));
         RoomEntity room = roomRepository.findById(dto.getRoomId()).orElseThrow(() -> new BusinessException("404", "Không tìm thấy phòng chiếu với id " + dto.getRoomId()));
-
-        ShowtimeEntity showtime = ShowtimeEntity.builder().movie(movie).room(room).showDate(dto.getShowDate()).startTime(dto.getShowTime()).ticketPrice(dto.getTicketPrice()).isActive(true).build();
+        DayOfWeek day = dto.getShowDate().getDayOfWeek();
+        boolean isWeekend = day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
+        boolean isEvening = dto.getShowTime().isAfter(LocalTime.of(17, 0));
+        Optional<BigDecimal> ticketPriceByRule = ticketPriceRuleRepository.findTicketPriceByRule(isWeekend, isEvening);
+        ShowtimeEntity showtime = ShowtimeEntity.builder()
+                .movie(movie)
+                .room(room)
+                .showDate(dto.getShowDate())
+                .startTime(dto.getShowTime())
+                .ticketPrice(ticketPriceByRule.orElse(BigDecimal.valueOf(45000)))
+                .isActive(true)
+                .build();
 
         ShowtimeEntity saved = showtimeRepository.save(showtime);
         return mapToDto(saved);

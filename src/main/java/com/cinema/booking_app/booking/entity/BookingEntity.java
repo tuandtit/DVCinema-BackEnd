@@ -2,7 +2,6 @@ package com.cinema.booking_app.booking.entity;
 
 import com.cinema.booking_app.common.base.entity.AbstractAuditingEntity;
 import com.cinema.booking_app.common.enums.PaymentStatus;
-import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tbl_bookings")
+@Table(name = "bookings")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,5 +31,5 @@ public class BookingEntity extends AbstractAuditingEntity<Long> {
     String bookingUrl;
     boolean isUsed = false;
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SeatShowtimeEntity> seatShowtimeEntities = new ArrayList<>();
+    private List<TicketEntity> seatShowtimeEntities = new ArrayList<>();
 }

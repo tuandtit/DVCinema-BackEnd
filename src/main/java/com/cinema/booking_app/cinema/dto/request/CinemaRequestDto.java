@@ -16,4 +16,5 @@ public class CinemaRequestDto {
     String name;
     @NotNull(message = "Rạp phim phải thuộc 1 thành phố")
     Long cityId;
+    String address;
 }

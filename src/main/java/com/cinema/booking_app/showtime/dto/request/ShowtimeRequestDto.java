@@ -28,8 +28,4 @@ public class ShowtimeRequestDto {
 
     @NotNull
     LocalTime showTime;
-
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    BigDecimal ticketPrice;
 }

@@ -1,8 +1,11 @@
-package com.cinema.booking_app.showtime.dto.response;
+package com.cinema.booking_app.booking.dto.response;
 
 import com.cinema.booking_app.common.enums.SeatStatus;
+import com.cinema.booking_app.common.enums.SeatType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -16,4 +19,6 @@ public class SeatDto {
     String seatName;
     SeatStatus status;
     Long selectedByUserId;
+    SeatType seatType;
+    BigDecimal price;
 }

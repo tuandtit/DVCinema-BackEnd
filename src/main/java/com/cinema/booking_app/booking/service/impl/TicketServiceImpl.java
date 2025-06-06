@@ -1,20 +1,21 @@
-package com.cinema.booking_app.showtime.service.impl;
+package com.cinema.booking_app.booking.service.impl;
 
+import com.cinema.booking_app.booking.dto.response.SeatDto;
+import com.cinema.booking_app.booking.dto.response.SeatsDto;
+import com.cinema.booking_app.booking.entity.TicketEntity;
+import com.cinema.booking_app.booking.repository.TicketRepository;
+import com.cinema.booking_app.booking.service.TicketService;
 import com.cinema.booking_app.common.base.dto.response.BaseDto;
 import com.cinema.booking_app.common.enums.SeatStatus;
+import com.cinema.booking_app.common.enums.SeatType;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.config.SeatWebSocketHandler;
 import com.cinema.booking_app.room.entity.RowEntity;
 import com.cinema.booking_app.room.entity.SeatEntity;
 import com.cinema.booking_app.room.repository.RowRepository;
 import com.cinema.booking_app.room.repository.SeatRepository;
-import com.cinema.booking_app.showtime.dto.response.SeatDto;
-import com.cinema.booking_app.showtime.dto.response.SeatsDto;
-import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import com.cinema.booking_app.showtime.entity.ShowtimeEntity;
-import com.cinema.booking_app.showtime.repository.SeatShowtimeRepository;
 import com.cinema.booking_app.showtime.repository.ShowtimeRepository;
-import com.cinema.booking_app.showtime.service.SeatShowtimeService;
 import com.cinema.booking_app.user.entity.AccountEntity;
 import com.cinema.booking_app.user.repository.AccountRepository;
 import lombok.AccessLevel;
@@ -31,22 +32,18 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SeatShowtimeServiceImpl implements SeatShowtimeService {
+public class TicketServiceImpl implements TicketService {
 
     private static final int MAX_SEATS = 8;
     ShowtimeRepository showtimeRepository;
-    SeatShowtimeRepository seatShowtimeRepository;
+    TicketRepository ticketRepository;
     SeatRepository seatRepository;
     RowRepository rowRepository;
     AccountRepository accountRepository;
@@ -58,7 +55,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         validateIds(userId, seatId, showtimeId);
 
         // Check max seats constraint
-        if (seatShowtimeRepository.countBookedSeatsByUserAndShowtime(userId, showtimeId) > MAX_SEATS) {
+        if (ticketRepository.countBookedSeatsByUserAndShowtime(userId, showtimeId) > MAX_SEATS) {
             throw new BusinessException("400", "Maximum booked seats reached: " + MAX_SEATS);
         }
 
@@ -72,7 +69,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         }
 
         // Create and save seat hold
-        SeatShowtimeEntity entity = SeatShowtimeEntity.builder()
+        TicketEntity entity = TicketEntity.builder()
                 .user(account)
                 .showtime(showtime)
                 .seat(seat)
@@ -82,7 +79,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
                 .build();
 
         try {
-            SeatShowtimeEntity saved = seatShowtimeRepository.save(entity);
+            TicketEntity saved = ticketRepository.save(entity);
             broadcastSeatUpdate(showtimeId, List.of(saved));
             return BaseDto.builder().id(saved.getId()).build();
         } catch (DataIntegrityViolationException e) {
@@ -99,7 +96,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         }
 
         // Fetch and update seat hold times in batch
-        List<SeatShowtimeEntity> seatShowtimeList = seatShowtimeRepository.findAllById(seatShowtimeIds);
+        List<TicketEntity> seatShowtimeList = ticketRepository.findAllById(seatShowtimeIds);
         if (seatShowtimeList.isEmpty()) {
             throw new BusinessException("404", "No seat showtimes found for provided IDs");
         }
@@ -107,7 +104,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
         Instant newCancelTime = Instant.now().plus(10, ChronoUnit.MINUTES);
         seatShowtimeList.forEach(seat -> seat.setCanceledTime(newCancelTime));
 
-        List<SeatShowtimeEntity> saved = seatShowtimeRepository.saveAll(seatShowtimeList);
+        List<TicketEntity> saved = ticketRepository.saveAll(seatShowtimeList);
 
         return saved.stream()
                 .map(s -> BaseDto.builder().id(s.getId()).build())
@@ -122,65 +119,88 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
             throw new BusinessException("400", "SeatShowtime IDs cannot be null or empty");
         }
 
-        seatShowtimeRepository.deleteAllByIdInBatch(seatShowtimeIds);
+        ticketRepository.deleteAllByIdInBatch(seatShowtimeIds);
         broadcastSeatUpdate(showtimeId, new ArrayList<>());
     }
 
     @Override
     public List<SeatsDto> getAllByShowtimeId(Long showtimeId) {
-        log.info("User dang chon ghe la: " + SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        log.info("User đang chọn ghế: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
         validateIds(null, null, showtimeId);
         ShowtimeEntity showtime = getShowtime(showtimeId);
+        BigDecimal basePrice = showtime.getTicketPrice();
 
-        // Fetch seat showtimes with join to reduce queries
-        List<SeatShowtimeEntity> seatShowtimes = seatShowtimeRepository.findByShowtimeId(showtimeId);
-        Map<Long, SeatShowtimeEntity> seatShowtimeMap = seatShowtimes.stream()
-                .collect(Collectors.toMap(
-                        sb -> sb.getSeat().getId(),
-                        Function.identity(),
-                        (e1, e2) -> e1 // Handle potential duplicates
-                ));
+        List<TicketEntity> seatShowtimes = ticketRepository.findByShowtimeId(showtimeId);
+        Map<Long, TicketEntity> seatShowtimeMap = mapSeatIdToTicket(seatShowtimes);
 
-        // Fetch rows and seats in one query
         List<RowEntity> rowEntities = rowRepository.findByRoomId(showtime.getRoom().getId());
-        List<SeatsDto> seatsDtos = new ArrayList<>(rowEntities.size());
+        List<SeatsDto> seatsDtos = new ArrayList<>();
 
         for (RowEntity row : rowEntities) {
-            List<SeatDto> seatDtos = row.getSeats().stream()
-                    .map(seat -> {
-                        SeatShowtimeEntity seatShowtime = seatShowtimeMap.getOrDefault(seat.getId(), null);
-                        return SeatDto.builder()
-                                .seatShowtimeId(seatShowtime != null ? seatShowtime.getId() : null)
-                                .seatId(seat.getId())
-                                .seatName(seat.getRow().getLabel() + seat.getSeatNumber())
-                                .status(seatShowtime != null ? seatShowtime.getStatus() : SeatStatus.AVAILABLE)
-                                .selectedByUserId(seatShowtime != null && seatShowtime.getUser() != null
-                                        ? seatShowtime.getUser().getId() : -1L)
-                                .build();
-                    })
-                    .toList();
-
-            seatsDtos.add(SeatsDto.builder()
-                    .rowId(row.getId())
-                    .seats(seatDtos)
-                    .build());
+            seatsDtos.add(buildSeatsDto(row, seatShowtimeMap, basePrice));
         }
 
         return seatsDtos;
     }
 
+    private Map<Long, TicketEntity> mapSeatIdToTicket(List<TicketEntity> tickets) {
+        Map<Long, TicketEntity> map = new HashMap<>();
+        for (TicketEntity ticket : tickets) {
+            Long seatId = ticket.getSeat().getId();
+            map.putIfAbsent(seatId, ticket);
+        }
+        return map;
+    }
+
+    private SeatsDto buildSeatsDto(RowEntity row, Map<Long, TicketEntity> seatShowtimeMap, BigDecimal basePrice) {
+        List<SeatDto> seatDtos = new ArrayList<>();
+
+        for (SeatEntity seat : row.getSeats()) {
+            TicketEntity ticket = seatShowtimeMap.get(seat.getId());
+            seatDtos.add(buildSeatDto(seat, ticket, row, basePrice));
+        }
+
+        return SeatsDto.builder()
+                .rowId(row.getId())
+                .seats(seatDtos)
+                .build();
+    }
+
+    private SeatDto buildSeatDto(SeatEntity seat, TicketEntity ticket, RowEntity row, BigDecimal basePrice) {
+        BigDecimal ticketPrice = basePrice;
+        SeatType seatType = seat.getSeatType();
+        if (ticket != null) {
+            if (SeatType.VIP.equals(seatType))
+                ticketPrice = ticketPrice.multiply(BigDecimal.valueOf(1.5));
+            if (SeatType.COUPLE.equals(seatType))
+                ticketPrice = ticketPrice.multiply(BigDecimal.valueOf(1.8));
+        }
+
+        return SeatDto.builder()
+                .seatShowtimeId(ticket != null ? ticket.getId() : null)
+                .seatId(seat.getId())
+                .seatName(row.getLabel() + seat.getSeatNumber())
+                .status(ticket != null ? ticket.getStatus() : SeatStatus.AVAILABLE)
+                .selectedByUserId(ticket != null && ticket.getUser() != null ? ticket.getUser().getId() : -1L)
+                .seatType(seatType)
+                .price(ticketPrice)
+                .build();
+    }
+
+
     @Scheduled(fixedRate = 30000)
     @Transactional
     public void releaseExpiredHeldSeats() {
-        List<SeatShowtimeEntity> expiredSeats = seatShowtimeRepository.findExpiredSeats(Instant.now());
+        List<TicketEntity> expiredSeats = ticketRepository.findExpiredSeats(Instant.now());
         if (expiredSeats.isEmpty()) {
             return;
         }
 
-        Map<Long, List<SeatShowtimeEntity>> seatsByShowtime = expiredSeats.stream()
+        Map<Long, List<TicketEntity>> seatsByShowtime = expiredSeats.stream()
                 .collect(Collectors.groupingBy(seat -> seat.getShowtime().getId()));
 
-        seatShowtimeRepository.deleteAllInBatch(expiredSeats);
+        ticketRepository.deleteAllInBatch(expiredSeats);
 
         seatsByShowtime.keySet().forEach(showtimeId -> broadcastSeatUpdate(showtimeId, null));
 
@@ -215,7 +235,7 @@ public class SeatShowtimeServiceImpl implements SeatShowtimeService {
                 .orElseThrow(() -> new BusinessException("404", "Showtime not found for ID: " + showtimeId));
     }
 
-    private void broadcastSeatUpdate(Long showtimeId, List<SeatShowtimeEntity> entity) {
+    private void broadcastSeatUpdate(Long showtimeId, List<TicketEntity> entity) {
         try {
             seatWebSocketHandler.broadcastSeatUpdate(showtimeId.toString(), entity);
         } catch (IOException e) {

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tbl_contributors")
+@Table(name = "contributors")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ContributorEntity extends AbstractAuditingEntity<Long> {
     @Column(name = "name")

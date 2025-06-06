@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,4 +20,5 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     @Query("UPDATE BookingEntity b SET b.bookingUrl = :url WHERE b.bookingCode = :code")
     void updateBookingUrl(@Param("code") Long bookingCode, @Param("url") String url);
 
+    List<BookingEntity> findByAccountId(Long accountId);
 }

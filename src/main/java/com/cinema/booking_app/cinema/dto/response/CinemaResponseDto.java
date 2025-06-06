@@ -12,4 +12,5 @@ import lombok.experimental.FieldDefaults;
 public class CinemaResponseDto {
     Long id;
     String name;
+    String address;
 }

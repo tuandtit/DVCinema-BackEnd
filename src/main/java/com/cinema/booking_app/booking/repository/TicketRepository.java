@@ -1,6 +1,6 @@
-package com.cinema.booking_app.showtime.repository;
+package com.cinema.booking_app.booking.repository;
 
-import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
+import com.cinema.booking_app.booking.entity.TicketEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,13 +10,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity, Long> {
+public interface TicketRepository extends JpaRepository<TicketEntity, Long> {
 
 
-    List<SeatShowtimeEntity> findByShowtimeId(Long showtimeId);
+    List<TicketEntity> findByShowtimeId(Long showtimeId);
 
     @Query("SELECT COUNT(s) " +
-            "FROM SeatShowtimeEntity s " +
+            "FROM TicketEntity s " +
             "WHERE s.user.id = :userId " +
             "AND s.showtime.id = :showtimeId " +
             "AND s.status = 'HOLD'")
@@ -24,19 +24,19 @@ public interface SeatShowtimeRepository extends JpaRepository<SeatShowtimeEntity
                                           @Param("showtimeId") Long showtimeId);
 
     @Query("SELECT s " +
-            "FROM SeatShowtimeEntity s " +
+            "FROM TicketEntity s " +
             "WHERE s.status = 'HOLD' AND s.canceledTime < :now")
-    List<SeatShowtimeEntity> findExpiredSeats(@Param("now") Instant now);
+    List<TicketEntity> findExpiredSeats(@Param("now") Instant now);
 
     @Modifying
-    @Query("UPDATE SeatShowtimeEntity s SET s.status = 'BOOKED' WHERE s.booking.bookingCode = :bookingCode")
+    @Query("UPDATE TicketEntity s SET s.status = 'BOOKED' WHERE s.booking.bookingCode = :bookingCode")
     void confirmBook(@Param("bookingCode") Long bookingCode);
 
     @Modifying
-    @Query("UPDATE SeatShowtimeEntity s SET s.booking.bookingCode = :bookingCode WHERE s.id IN :seatShowtimeIds")
+    @Query("UPDATE TicketEntity s SET s.booking.bookingCode = :bookingCode WHERE s.id IN :seatShowtimeIds")
     void setBookingCode(@Param("bookingCode") Long bookingCode, @Param("seatShowtimeIds") Set<Long> seatShowtimeIds);
 
-    List<SeatShowtimeEntity> findByBooking_BookingCode(@Param("bookingCode") Long bookingCode);
+    List<TicketEntity> findByBooking_BookingCode(@Param("bookingCode") Long bookingCode);
 
     void deleteAllByBooking_BookingCode(Long bookingBookingCode);
 }

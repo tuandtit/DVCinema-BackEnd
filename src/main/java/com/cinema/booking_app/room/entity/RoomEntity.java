@@ -6,12 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.SQLDelete;
 
 import java.util.List;
 
 @Entity
-@Table(name = "tbl_rooms", uniqueConstraints = {
+@Table(name = "rooms", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"name", "cinema_id"})
 })
 @Getter

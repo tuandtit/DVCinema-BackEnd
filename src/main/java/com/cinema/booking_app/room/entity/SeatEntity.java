@@ -8,8 +8,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "tbl_seats", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"seatNumber", "row_id"})
+@Table(name = "seats", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"seat_number", "row_id"})
 })
 @Getter
 @Setter

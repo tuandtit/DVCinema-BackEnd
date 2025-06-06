@@ -4,7 +4,7 @@ import com.cinema.booking_app.common.base.dto.response.Response;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
-import com.cinema.booking_app.showtime.dto.response.SeatsDto;
+import com.cinema.booking_app.booking.dto.response.SeatsDto;
 import com.cinema.booking_app.room.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

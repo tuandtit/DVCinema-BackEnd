@@ -1,18 +1,19 @@
 package com.cinema.booking_app.booking.service.impl;
 
 import com.cinema.booking_app.booking.dto.request.BookingRequestDto;
+import com.cinema.booking_app.booking.dto.response.BookingHistoryDto;
 import com.cinema.booking_app.booking.dto.response.BookingResponseDto;
 import com.cinema.booking_app.booking.dto.response.TicketDto;
 import com.cinema.booking_app.booking.entity.BookingEntity;
+import com.cinema.booking_app.booking.entity.TicketEntity;
 import com.cinema.booking_app.booking.mapper.BookingMapper;
 import com.cinema.booking_app.booking.repository.BookingRepository;
+import com.cinema.booking_app.booking.repository.TicketRepository;
 import com.cinema.booking_app.booking.service.BookingService;
 import com.cinema.booking_app.common.base.service.impl.MailService;
 import com.cinema.booking_app.common.enums.PaymentStatus;
 import com.cinema.booking_app.common.error.BusinessException;
-import com.cinema.booking_app.showtime.entity.SeatShowtimeEntity;
 import com.cinema.booking_app.showtime.entity.ShowtimeEntity;
-import com.cinema.booking_app.showtime.repository.SeatShowtimeRepository;
 import com.cinema.booking_app.showtime.repository.ShowtimeRepository;
 import com.cinema.booking_app.user.entity.AccountEntity;
 import com.cinema.booking_app.user.repository.AccountRepository;
@@ -39,7 +40,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class BookingServiceImpl implements BookingService {
 
     BookingRepository bookingRepository;
-    SeatShowtimeRepository seatShowtimeRepository;
+    TicketRepository ticketRepository;
     BookingMapper bookingMapper;
     MailService mailService;
     AsyncQrService asyncQrService;
@@ -63,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
 
         asyncQrService.generateAndUploadQRCodeAsync(bookingCode);
 
-        seatShowtimeRepository.setBookingCode(bookingCode, request.getSeatShowtimeIds());
+        ticketRepository.setBookingCode(bookingCode, request.getSeatShowtimeIds());
 
         // Ánh xạ sang DTO
         return bookingMapper.toDto(booking);
@@ -78,14 +79,14 @@ public class BookingServiceImpl implements BookingService {
         }
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
         booking.setBookingTime(LocalDateTime.now());
-        seatShowtimeRepository.confirmBook(bookingCode);
+        ticketRepository.confirmBook(bookingCode);
         bookingRepository.save(booking);
     }
 
     @Override
     @Transactional
     public void deleteBooking(Long bookingCode) {
-        seatShowtimeRepository.deleteAllByBooking_BookingCode(bookingCode);
+        ticketRepository.deleteAllByBooking_BookingCode(bookingCode);
         bookingRepository.deleteByBookingCode(bookingCode);
     }
 
@@ -96,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getPaymentStatus() != PaymentStatus.SUCCESS) {
             booking.setPaymentStatus(PaymentStatus.SUCCESS);
             booking.setBookingTime(LocalDateTime.now());
-            seatShowtimeRepository.confirmBook(bookingCode);
+            ticketRepository.confirmBook(bookingCode);
             bookingRepository.save(booking);
         }
 
@@ -106,7 +107,7 @@ public class BookingServiceImpl implements BookingService {
         BookingResponseDto dto = bookingMapper.toDto(booking);
         ShowtimeEntity showtime = showtimeRepository.findById(booking.getShowtimeId())
                 .orElseThrow(() -> new BusinessException("404", "Showtime not found with id: " + booking.getShowtimeId()));
-        List<SeatShowtimeEntity> seatShowtimeEntities = seatShowtimeRepository.findByBooking_BookingCode(bookingCode);
+        List<TicketEntity> seatShowtimeEntities = ticketRepository.findByBooking_BookingCode(bookingCode);
         String seatName = String.join(",",
                 seatShowtimeEntities.stream()
                         .map(entity -> entity.getSeat().getRow().getLabel() + entity.getSeat().getSeatNumber())
@@ -129,8 +130,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setUsed(true);
         bookingRepository.save(booking);
         List<TicketDto> dtos = new ArrayList<>();
-        List<SeatShowtimeEntity> seatShowtimeEntities = seatShowtimeRepository.findByBooking_BookingCode(bookingCode);
-        for (var entity : seatShowtimeEntities) {
+        List<TicketEntity> ticketEntities = ticketRepository.findByBooking_BookingCode(bookingCode);
+        for (var entity : ticketEntities) {
             var showtime = entity.getShowtime();
             TicketDto dto = TicketDto.builder()
                     .cinemaName(showtime.getRoom().getCinema().getName())
@@ -148,6 +149,35 @@ public class BookingServiceImpl implements BookingService {
         return !dtos.isEmpty() ? dtos : List.of(TicketDto.builder().build());
     }
 
+    @Override
+    public List<BookingHistoryDto> getHistoryBooking(Long userId) {
+        var bookingEntities = bookingRepository.findByAccountId(userId);
+        if (bookingEntities.isEmpty())
+            return List.of();
+        List<BookingHistoryDto> dtos = new ArrayList<>();
+        for (var entity : bookingEntities) {
+            List<TicketEntity> ticketEntities = ticketRepository.findByBooking_BookingCode(entity.getBookingCode());
+            var showtime = getShowtime(entity.getShowtimeId());
+            String cinemaName = showtime.getRoom().getCinema().getName() + "-" + showtime.getRoom().getName();
+            String seatName = String.join(",",
+                    ticketEntities.stream()
+                            .map(ticket -> ticket.getSeat().getRow().getLabel() + ticket.getSeat().getSeatNumber())
+                            .toList());
+            BookingHistoryDto dto = BookingHistoryDto.builder()
+                    .bookingCode(entity.getBookingCode().toString())
+                    .cinemaName(cinemaName)
+                    .movieName(showtime.getMovie().getTitle())
+                    .seat(seatName)
+                    .totalAmount(entity.getTotalPrice())
+                    .bookingUrl(entity.getBookingUrl())
+                    .bookingDate(this.formatBookingTime(entity.getBookingTime()))
+                    .showDateTime(this.getShowDateTimeFormatted(showtime.getShowDate(), showtime.getStartTime()))
+                    .build();
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
     private String getShowDateTimeFormatted(LocalDate showDate, LocalTime startTime) {
         if (showDate == null || startTime == null) {
             return null; // hoặc throw exception nếu cần
@@ -155,6 +185,14 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime dateTime = LocalDateTime.of(showDate, startTime);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy - HH:mm");
         return dateTime.format(formatter);
+    }
+
+    public String formatBookingTime(LocalDateTime bookingTime) {
+        if (bookingTime == null) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy - HH:mm");
+        return bookingTime.format(formatter);
     }
 
 

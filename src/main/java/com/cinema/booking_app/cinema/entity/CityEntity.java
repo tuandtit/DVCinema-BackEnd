@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Entity
-@Table(name = "tbl_cities")
+@Table(name = "cities")
 @Getter
 @Setter
 @NoArgsConstructor

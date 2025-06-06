@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Entity
-@Table(name = "tbl_cinemas", uniqueConstraints = {
+@Table(name = "cinemas", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"name", "city_id"})
 })
 @Getter

@@ -5,8 +5,6 @@ import com.cinema.booking_app.common.enums.MovieStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -18,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tbl_movies", uniqueConstraints = {
+@Table(name = "movies", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"title", "director_id"})
 })
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -52,7 +50,7 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
     // Nhiều diễn viên
     @ManyToMany
     @JoinTable(
-            name = "tbl_movie_actors",
+            name = "movie_actors",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id")
     )
@@ -65,7 +63,7 @@ public class MovieEntity extends AbstractAuditingEntity<Long> {
 
     @ManyToMany
     @JoinTable(
-            name = "tbl_movie_genres",
+            name = "movie_genres",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )

@@ -17,7 +17,7 @@ import java.time.LocalTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tbl_show_times")
+@Table(name = "show_times")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowtimeEntity extends AbstractAuditingEntity<Long> {
 
@@ -29,16 +29,11 @@ public class ShowtimeEntity extends AbstractAuditingEntity<Long> {
     @JoinColumn(name = "room_id")
     private RoomEntity room;
 
-    @Column(name = "show_date")
     private LocalDate showDate;
 
-    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
     private BigDecimal ticketPrice;
 
-    @Column(nullable = false)
     private boolean isActive = true;
-
 }
