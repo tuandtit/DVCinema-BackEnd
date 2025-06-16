@@ -1,6 +1,7 @@
 package com.cinema.booking_app.booking.repository;
 
 import com.cinema.booking_app.booking.entity.BookingEntity;
+import com.cinema.booking_app.common.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +21,5 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     @Query("UPDATE BookingEntity b SET b.bookingUrl = :url WHERE b.bookingCode = :code")
     void updateBookingUrl(@Param("code") Long bookingCode, @Param("url") String url);
 
-    List<BookingEntity> findByAccountId(Long accountId);
+    List<BookingEntity> findByAccountIdAndPaymentStatus(Long accountId, PaymentStatus paymentStatus);
 }

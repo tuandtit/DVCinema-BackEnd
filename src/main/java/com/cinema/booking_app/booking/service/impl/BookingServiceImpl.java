@@ -125,8 +125,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<TicketDto> checkin(Long bookingCode) {
         BookingEntity booking = getBooking(bookingCode);
+        if (booking.getPaymentStatus() != PaymentStatus.SUCCESS) {
+            throw new BusinessException("400", "Đơn vé này chưa thanh toán thành công");
+        }
         if (booking.isUsed())
-            throw new BusinessException("400", "Booking has been used");
+            throw new BusinessException("400", "Đơn vé này đã được sử dụng");
         booking.setUsed(true);
         bookingRepository.save(booking);
         List<TicketDto> dtos = new ArrayList<>();
@@ -151,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingHistoryDto> getHistoryBooking(Long userId) {
-        var bookingEntities = bookingRepository.findByAccountId(userId);
+        var bookingEntities = bookingRepository.findByAccountIdAndPaymentStatus(userId, PaymentStatus.SUCCESS);
         if (bookingEntities.isEmpty())
             return List.of();
         List<BookingHistoryDto> dtos = new ArrayList<>();

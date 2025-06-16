@@ -25,9 +25,9 @@ public class MovieResponseDto {
 
     String videoUrl;
 
-    Set<String> actorNames;
+    Set<ContributorResponseDto> actors;
 
-    String directorName;
+    ContributorResponseDto director;
 
     Integer duration; // phút
 
@@ -37,5 +37,5 @@ public class MovieResponseDto {
 
     MovieStatus status; // COMING_SOON, NOW_SHOWING, ENDED
 
-    Set<String> genreNames;
+    Set<GenreResponseDto> genres;
 }

@@ -4,6 +4,7 @@ import com.cinema.booking_app.common.base.service.CloudinaryService;
 import com.cinema.booking_app.common.enums.ContributorType;
 import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.movie.dto.request.create.MovieRequestDto;
+import com.cinema.booking_app.movie.dto.request.search.GetMoviesByDateAndCinemaRequest;
 import com.cinema.booking_app.movie.dto.request.search.MovieSearchRequest;
 import com.cinema.booking_app.movie.dto.request.update.MovieUpdateRequestDto;
 import com.cinema.booking_app.movie.dto.response.MovieResponseDto;
@@ -15,14 +16,18 @@ import com.cinema.booking_app.movie.repository.ContributorRepository;
 import com.cinema.booking_app.movie.repository.GenreRepository;
 import com.cinema.booking_app.movie.repository.MovieRepository;
 import com.cinema.booking_app.movie.service.MovieService;
+import com.cinema.booking_app.showtime.repository.ShowtimeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +45,7 @@ public class MovieServiceImpl implements MovieService {
     CloudinaryService cloudinaryService;
 
     MovieMapper movieMapper;
+    ShowtimeRepository showtimeRepository;
 
     @Override
     public MovieResponseDto create(MovieRequestDto dto) {
@@ -64,9 +70,9 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public MovieResponseDto update(Long id, MovieUpdateRequestDto dto) {
+    public MovieResponseDto update(MovieUpdateRequestDto dto) {
 
-        MovieEntity entity = getMovieById(id);
+        MovieEntity entity = getMovieById(dto.getMovieId());
         movieMapper.update(dto, entity);
 
         Optional.ofNullable(dto.getDirectorId())
@@ -80,7 +86,14 @@ public class MovieServiceImpl implements MovieService {
         Optional.ofNullable(dto.getGenreIds())
                 .map(this::getExistsGenres)
                 .ifPresent(entity::setGenres);
-
+        MultipartFile poster = dto.getPoster();
+        if (Objects.nonNull(poster)) {
+            try {
+                entity.setPosterUrl(cloudinaryService.uploadImage(poster));
+            } catch (IOException e) {
+                throw new BusinessException("400", e.getMessage());
+            }
+        }
         return movieMapper.toDto(movieRepository.save(entity));
     }
 
@@ -98,6 +111,12 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieResponseDto> getAll(MovieSearchRequest request) {
         return movieRepository.findAll(request.specification(), request.getPaging().pageable())
                 .map(movieMapper::toDto);
+    }
+
+    @Override
+    public List<MovieResponseDto> getMoviesByDateAndCinema(GetMoviesByDateAndCinemaRequest request) {
+        List<MovieEntity> movieEntities = showtimeRepository.findByShowDateAndCinemaId(request.getDate(), request.getCinemaId());
+        return movieMapper.toDto(movieEntities);
     }
 
     private MovieEntity getMovieById(Long id) {

@@ -1,7 +1,6 @@
 package com.cinema.booking_app.config;
 
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
@@ -21,7 +20,7 @@ public class WebConfigure implements ServletContextInitializer {
     private final Environment env;
 
     @Override
-    public void onStartup(final ServletContext servletContext) throws ServletException {
+    public void onStartup(final ServletContext servletContext) {
         if (env.getActiveProfiles().length != 0) {
             log.info("Web application configuration, using profiles: {}", (Object[]) env.getActiveProfiles());
         }

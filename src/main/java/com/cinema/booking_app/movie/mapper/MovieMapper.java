@@ -26,31 +26,4 @@ public interface MovieMapper extends EntityMapper<MovieEntity, MovieRequestDto, 
             nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
             nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
     void update(MovieUpdateRequestDto dto, @MappingTarget MovieEntity entity);
-
-    @Override
-    @Mapping(target = "genreNames", expression = "java(mapGenreNames(entity))")
-    @Mapping(target = "actorNames", expression = "java(mapActorNames(entity))")
-    @Mapping(target = "directorName", expression = "java(mapDirectorName(entity))")
-    MovieResponseDto toDto(MovieEntity entity);
-
-    default Set<String> mapGenreNames(MovieEntity entity) {
-        if (entity.getGenres() == null) return Collections.emptySet();
-        return entity.getGenres()
-                .stream()
-                .map(GenreEntity::getName)
-                .collect(Collectors.toSet());
-    }
-
-    default Set<String> mapActorNames(MovieEntity entity) {
-        if (entity.getActors() == null) return Collections.emptySet();
-        return entity.getActors()
-                .stream()
-                .map(ContributorEntity::getName)
-                .collect(Collectors.toSet());
-    }
-
-    default String mapDirectorName(MovieEntity entity) {
-        if (entity.getDirector() == null) return "";
-        return entity.getDirector().getName();
-    }
 }
