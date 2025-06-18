@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +74,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     public List<ShowtimeResponseDto> getByMovieIdAndCinemaId(Long movieId, Long cinemaId) {
-        return showtimeRepository.findByMovieIdAndCinemaId(movieId, cinemaId).stream()
+        return showtimeRepository.findByMovieIdAndCinemaId(movieId, cinemaId, LocalDate.now(), LocalTime.now()).stream()
                 .map(this::mapToDto).toList();
     }
 

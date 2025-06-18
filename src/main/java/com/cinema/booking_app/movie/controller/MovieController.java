@@ -10,6 +10,7 @@ import com.cinema.booking_app.movie.dto.response.MovieResponseDto;
 import com.cinema.booking_app.movie.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +50,7 @@ public class MovieController {
     }
 
     @GetMapping("/by-date")
-    public Response<List<MovieResponseDto>> getByDate(@RequestBody final GetMoviesByDateAndCinemaRequest request) {
+    public Response<List<MovieResponseDto>> getByDate(@ParameterObject final GetMoviesByDateAndCinemaRequest request) {
         return Response.ok(movieService.getMoviesByDateAndCinema(request));
     }
 }
