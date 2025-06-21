@@ -1,9 +1,9 @@
 package com.cinema.booking_app.room.service;
 
+import com.cinema.booking_app.booking.dto.response.SeatsDto;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
-import com.cinema.booking_app.booking.dto.response.SeatsDto;
 
 import java.util.List;
 
@@ -17,4 +17,6 @@ public interface RoomService {
     List<SeatsDto> getSeatsByRoomId(Long id);
 
     List<RoomResponseDto> getAll();
+
+    List<RoomResponseDto> getAllByCinemaId(Long cinemaId);
 }

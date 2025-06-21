@@ -1,5 +1,7 @@
 package com.cinema.booking_app.room.service.impl;
 
+import com.cinema.booking_app.booking.dto.response.SeatDto;
+import com.cinema.booking_app.booking.dto.response.SeatsDto;
 import com.cinema.booking_app.cinema.entity.CinemaEntity;
 import com.cinema.booking_app.cinema.repository.CinemaRepository;
 import com.cinema.booking_app.common.enums.SeatStatus;
@@ -8,8 +10,6 @@ import com.cinema.booking_app.common.error.BusinessException;
 import com.cinema.booking_app.room.dto.request.create.RoomRequestDto;
 import com.cinema.booking_app.room.dto.request.update.RoomUpdateDto;
 import com.cinema.booking_app.room.dto.response.RoomResponseDto;
-import com.cinema.booking_app.booking.dto.response.SeatDto;
-import com.cinema.booking_app.booking.dto.response.SeatsDto;
 import com.cinema.booking_app.room.entity.RoomEntity;
 import com.cinema.booking_app.room.entity.RowEntity;
 import com.cinema.booking_app.room.entity.SeatEntity;
@@ -77,7 +77,28 @@ public class RoomServiceImpl implements RoomService {
 
         room.setName(updatedName);
         room.setCinema(existsCinema(updatedCinemaId));
+        if (dto.getTotalRows() != null && dto.getTotalRows() > 0) {
+            List<RowEntity> rows = IntStream.range(0, dto.getTotalRows())
+                    .mapToObj(i -> {
+                        String rowLabel = String.valueOf((char) ('A' + i));
+                        RowEntity row = RowEntity.builder().label(rowLabel).room(room).build();
 
+                        List<SeatEntity> seats = IntStream.range(1, dto.getSeatsPerRow() + 1) // Dùng IntStream cho seats
+                                .mapToObj(j -> SeatEntity.builder()
+                                        .seatNumber(String.valueOf(j))
+                                        .seatType(SeatType.SINGLE)
+                                        .row(row)
+                                        .build())
+                                .toList();
+
+                        row.setSeats(seats);
+                        return row;
+                    })
+                    .toList();
+
+            room.setRows(rows);
+            room.setIsActive(true);
+        }
         return saveAndReturnDto(room);
     }
 
@@ -113,6 +134,11 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<RoomResponseDto> getAll() {
         return roomMapper.toDto(roomRepository.findAll());
+    }
+
+    @Override
+    public List<RoomResponseDto> getAllByCinemaId(Long cinemaId) {
+        return roomMapper.toDto(roomRepository.findRoomsByCinemaId(cinemaId));
     }
 
     private RoomEntity existsRoom(Long id) {

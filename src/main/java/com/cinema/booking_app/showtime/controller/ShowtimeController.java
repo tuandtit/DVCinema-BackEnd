@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,11 @@ public class ShowtimeController {
     @GetMapping("")
     public Response<List<ShowtimeResponseDto>> getByMovieIdAndCinemaId(@RequestParam("movieId") Long movieId, @RequestParam("cinemaId") Long cinemaId) {
         return Response.ok(showtimeService.getByMovieIdAndCinemaId(movieId, cinemaId));
+    }
+
+    @GetMapping("/filter-showtime")
+    public Response<List<ShowtimeResponseDto>> getByCinemaIdAndShowDate(@RequestParam(required = false) Long cinemaId, @RequestParam(required = false) LocalDate showDate) {
+        return Response.ok(showtimeService.findByCinemaIdAndShowDate(cinemaId, showDate));
     }
 
     @DeleteMapping("/{id}")

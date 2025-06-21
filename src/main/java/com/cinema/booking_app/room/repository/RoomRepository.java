@@ -12,6 +12,6 @@ import java.util.List;
 public interface RoomRepository extends JpaRepository<RoomEntity, Long> {
     boolean existsByNameAndCinemaId(String name, Long cinemaId);
 
-    @Query("SELECT r.id FROM RoomEntity r WHERE r.cinema.id = :cinemaId AND r.isActive = true")
-    List<Long> findRoomIdsByCinemaId(@Param("cinemaId")Long cinemaId);
+    @Query("SELECT r FROM RoomEntity r WHERE r.cinema.id = :cinemaId AND r.isActive = true")
+    List<RoomEntity> findRoomsByCinemaId(@Param("cinemaId")Long cinemaId);
 }

@@ -22,4 +22,6 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     void updateBookingUrl(@Param("code") Long bookingCode, @Param("url") String url);
 
     List<BookingEntity> findByAccountIdAndPaymentStatus(Long accountId, PaymentStatus paymentStatus);
+
+    boolean existsByShowtimeId(Long showtimeId);
 }

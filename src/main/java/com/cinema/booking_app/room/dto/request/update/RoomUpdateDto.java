@@ -12,4 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class RoomUpdateDto {
     String name;
     Long cinemaId;
+    Integer totalRows;
+    Integer seatsPerRow;
 }

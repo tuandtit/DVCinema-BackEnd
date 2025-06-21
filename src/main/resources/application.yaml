@@ -45,7 +45,7 @@ spring:
 #      port: 6379
 #      password: redis
 jwt:
-  expired: 60
+  expired: 1440
   rsa-private-key: classpath:certs/privateKey.pem
   rsa-public-key: classpath:certs/publicKey.pem
 logging:

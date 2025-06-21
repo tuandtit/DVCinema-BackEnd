@@ -28,4 +28,32 @@ public interface ShowtimeRepository extends JpaRepository<ShowtimeEntity, Long> 
 
     @Query("SELECT s.movie FROM ShowtimeEntity s WHERE s.showDate = :date AND s.room.cinema.id = :cinemaId AND s.isActive = true AND s.movie.status='NOW_SHOWING'")
     List<MovieEntity> findByShowDateAndCinemaId(LocalDate date, Long cinemaId);
+
+    @Query("""
+                SELECT s FROM ShowtimeEntity s
+                WHERE (:cinemaId IS NULL OR s.room.cinema.id = :cinemaId)
+                  AND (s.showDate = :showDate OR CAST(:showDate AS DATE) IS NULL )
+            """)
+    List<ShowtimeEntity> findByCinemaIdAndShowDate(
+            @Param("cinemaId") Long cinemaId,
+            @Param("showDate") LocalDate showDate
+    );
+
+    @Query("""
+    SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+    FROM ShowtimeEntity s
+    WHERE s.room.id = :roomId
+      AND s.showDate = :showDate
+      AND (
+            (:newStartTime < s.endTime AND :newEndTime > s.startTime)
+          )
+""")
+    boolean isOverlappingShowtime(
+            @Param("roomId") Long roomId,
+            @Param("showDate") LocalDate showDate,
+            @Param("newStartTime") LocalTime newStartTime,
+            @Param("newEndTime") LocalTime newEndTime
+    );
+
+
 }

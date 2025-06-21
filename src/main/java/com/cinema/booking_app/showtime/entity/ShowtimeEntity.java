@@ -33,6 +33,8 @@ public class ShowtimeEntity extends AbstractAuditingEntity<Long> {
 
     private LocalTime startTime;
 
+    private LocalTime endTime;
+
     private BigDecimal ticketPrice;
 
     private boolean isActive = true;
